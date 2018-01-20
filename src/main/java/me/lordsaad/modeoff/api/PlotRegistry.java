@@ -108,6 +108,7 @@ public class PlotRegistry {
 			return;
 		}
 
+		int count = 0;
 		for (File file : Objects.requireNonNull(directory.listFiles())) {
 			if (file == null) continue;
 
@@ -152,6 +153,7 @@ public class PlotRegistry {
 					Plot plot = new Plot(id, uuids);
 
 					plots.add(plot);
+					count++;
 
 					ModeratorOff.logger.info("    > Successfully registered plot id `" + plot.getID() + "`");
 				}
@@ -160,8 +162,8 @@ public class PlotRegistry {
 				ModeratorOff.logger.info("    > Error reading json of `" + file.getName() + "`. -> " + e.getCause());
 				e.printStackTrace();
 			}
-
 		}
+		ModeratorOff.logger.info("> Successfully registered " + count + " plots.");
 		ModeratorOff.logger.info("<<========================================================================>>");
 	}
 

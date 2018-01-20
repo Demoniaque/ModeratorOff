@@ -1,6 +1,7 @@
 package me.lordsaad.modeoff.common;
 
 import com.teamwizardry.librarianlib.features.network.PacketHandler;
+import me.lordsaad.modeoff.ModeratorOff;
 import me.lordsaad.modeoff.api.Plot;
 import me.lordsaad.modeoff.api.PlotRegistry;
 import me.lordsaad.modeoff.common.network.PacketSyncPlots;
@@ -23,13 +24,15 @@ public class EventHandler {
 	@SubscribeEvent
 	public void onWorldLoad(EntityJoinWorldEvent event) {
 		if (event.getEntity() instanceof EntityPlayerMP) {
+			ModeratorOff.logger.info("About to send plot data to " + event.getEntity().getName());
 			PacketHandler.NETWORK.sendTo(new PacketSyncPlots(new HashSet<>(PlotRegistry.INSTANCE.plots)), (EntityPlayerMP) event.getEntity());
+			ModeratorOff.logger.info("Done.");
 		}
 	}
 
 	@SubscribeEvent
 	public void leftClickBlock(PlayerInteractEvent.LeftClickBlock event) {
-		if (event.getEntityPlayer().getName().startsWith("Player")) return;
+	//	if (event.getEntityPlayer().getName().startsWith("Player")) return;
 
 		Plot plot = PlotRegistry.INSTANCE.getPlot(event.getEntityPlayer().getUniqueID());
 
@@ -74,7 +77,7 @@ public class EventHandler {
 
 	@SubscribeEvent
 	public void onBreakBlock(BlockEvent.BreakEvent event) {
-		if (event.getPlayer().getName().startsWith("Player")) return;
+	//	if (event.getPlayer().getName().startsWith("Player")) return;
 		Plot plot = PlotRegistry.INSTANCE.getPlot(event.getPlayer().getUniqueID());
 
 		if (plot == null) {
@@ -109,7 +112,7 @@ public class EventHandler {
 
 	@SubscribeEvent
 	public void breakSpeed(PlayerEvent.BreakSpeed event) {
-		if (event.getEntityPlayer().getName().startsWith("Player")) return;
+	//	if (event.getEntityPlayer().getName().startsWith("Player")) return;
 
 		Plot plot = PlotRegistry.INSTANCE.getPlot(event.getEntityPlayer().getUniqueID());
 
@@ -144,7 +147,7 @@ public class EventHandler {
 
 	@SubscribeEvent
 	public void place(BlockEvent.PlaceEvent event) {
-		if (event.getPlayer().getName().startsWith("Player")) return;
+	//	if (event.getPlayer().getName().startsWith("Player")) return;
 
 		Plot plot = PlotRegistry.INSTANCE.getPlot(event.getPlayer().getUniqueID());
 

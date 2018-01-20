@@ -2,6 +2,7 @@ package me.lordsaad.modeoff.common.command;
 
 import me.lordsaad.modeoff.api.Plot;
 import me.lordsaad.modeoff.api.PlotRegistry;
+import me.lordsaad.modeoff.common.CommonProxy;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
@@ -53,11 +54,11 @@ public class CommandAssign extends CommandBase {
 
 		//if (player == null) throw new WrongUsageException(getUsage(sender));
 
-		//if (PlotRegistry.INSTANCE.isUUIDRegistered(player.getUniqueID())) {
-		//	CommonProxy.contestants.add(player.getUniqueID());
-		//	sender.sendMessage(new TextComponentString(TextFormatting.RED + "The plot for '" + TextFormatting.GOLD + player.getName() + TextFormatting.RED + "' has already been registered. Do /plot_tp to teleport to it."));
-		//	return;
-		//}
+		if (PlotRegistry.INSTANCE.isUUIDRegistered(player.getUniqueID())) {
+			CommonProxy.contestants.add(player.getUniqueID());
+			sender.sendMessage(new TextComponentString(TextFormatting.RED + "The plot for '" + TextFormatting.GOLD + player.getName() + TextFormatting.RED + "' has already been registered. Do /plot_tp to teleport to it."));
+			return;
+		}
 
 		HashSet<UUID> owners = new HashSet<>();
 		owners.add(player.getUniqueID());

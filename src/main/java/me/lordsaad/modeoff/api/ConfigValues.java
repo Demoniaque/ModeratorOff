@@ -12,7 +12,7 @@ public final class ConfigValues {
 	public static String directionOfColumns = "SOUTH";
 	public static int gridRows = 4;
 	public static int gridColumns = 4;
-	public static int plotSize = 35;
+	public static int plotSize = 34;
 	public static int plotMarginWidth = 11;
 	public static int plotWorldDimensionID = 0;
 }

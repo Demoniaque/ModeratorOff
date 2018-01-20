@@ -1,7 +1,6 @@
 package me.lordsaad.modeoff.api;
 
 import com.teamwizardry.librarianlib.features.math.Vec2d;
-import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
@@ -49,8 +48,6 @@ public class Plot implements INBTSerializable<NBTTagCompound> {
 		center = center.mul(ConfigValues.plotSize + ConfigValues.plotMarginWidth);
 
 		center = center.add(ConfigValues.x, ConfigValues.z).add(0.5, 0.5);
-
-		Minecraft.getMinecraft().player.sendChatMessage(center.getXi() + ", " + center.getYi());
 		return center;
 	}
 
@@ -102,7 +99,11 @@ public class Plot implements INBTSerializable<NBTTagCompound> {
 		private final BlockPos corner1, corner2;
 
 		public PlotDimensions(int plotID) {
-			Vec2d center = Utils.spiralLocFromID(plotID, new Vec2d(ConfigValues.x, ConfigValues.z)).mul(ConfigValues.plotSize + ConfigValues.plotMarginWidth).add(0.5, 0.5);
+			Vec2d center = Utils.spiralLocFromID(plotID, Vec2d.ZERO);
+
+			center = center.mul(ConfigValues.plotSize + ConfigValues.plotMarginWidth);
+
+			center = center.add(ConfigValues.x, ConfigValues.z).add(0.5, 0.5);
 
 			corner1 = new BlockPos(center.getX() - (ConfigValues.plotSize / 2), ConfigValues.y, center.getY() - (ConfigValues.plotSize / 2));
 			corner2 = new BlockPos(center.getX() + (ConfigValues.plotSize / 2), ConfigValues.y, center.getY() + (ConfigValues.plotSize / 2));

@@ -7,7 +7,7 @@ buildscript {
         }
     }
     dependencies {
-        classpath "net.minecraftforge.gradle:ForgeGradle:2.2-SNAPSHOT"
+        classpath "net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT"
     }
 }
 
@@ -22,23 +22,19 @@ group = modGroup
 archivesBaseName = modBaseName
 
 minecraft {
-    version = project.forgeVersion
+    version = "1.12.2-14.23.1.2555"
     runDir = "run"
 
-    // the mappings can be changed at any time, and must be in the following format.
-    // snapshot_YYYYMMDD   snapshot are built nightly.
-    // stable_#            stables are built at the discretion of the MCP team.
-    // Use non-default mappings at your own risk. they may not always work.
-    // simply re-run your setup task after changing the mappings to update your workspace.
-    mappings = project.mcpVersion
-    // makeObfSourceJar = false // an Srg named sources jar is made by default. uncomment this to disable.
+    mappings = "snapshot_20171231"
 }
 
 repositories {
     mavenCentral()
+    maven { url = "http://maven.bluexin.be/repository/snapshots/" }
 }
 
 dependencies {
+    compile "com.teamwizardry.librarianlib:librarianlib-1.12.2:$liblib_version:deobf"
 }
 
 processResources {
@@ -57,5 +53,13 @@ processResources {
     // copy everything else, thats not the mcmod.info
     from(sourceSets.main.resources.srcDirs) {
         exclude "mcmod.info"
+    }
+}
+
+idea {
+    module {
+        inheritOutputDirs = false
+        outputDir = compileJava.destinationDir
+        testOutputDir = compileTestJava.destinationDir
     }
 }

@@ -1,13 +1,15 @@
 package me.lordsaad.modeoff.common.command;
 
-import me.lordsaad.modeoff.api.PlotManager;
+import me.lordsaad.modeoff.api.Plot;
+import me.lordsaad.modeoff.api.PlotRegistry;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
-import net.minecraft.command.PlayerNotFoundException;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.TextFormatting;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
@@ -28,7 +30,7 @@ public class CommandTpPlot extends CommandBase {
 	@NotNull
 	@Override
 	public String getUsage(@NotNull ICommandSender sender) {
-		return "/plot_tp [username/plotID] [username/plotID]";
+		return "/plot_tp [username/plotID]";
 	}
 
 	@Override
@@ -44,34 +46,28 @@ public class CommandTpPlot extends CommandBase {
 		//}
 
 		if (args.length == 0) {
-			new PlotManager(getCommandSenderAsPlayer(sender)).teleportToCenter();
+			Plot plot = PlotRegistry.INSTANCE.getPlot(getCommandSenderAsPlayer(sender).getUniqueID());
+			if (plot == null) {
+				sender.sendMessage(new TextComponentString(TextFormatting.RED + "You do not have a plot to teleport to."));
+			} else plot.teleportToPlot(getCommandSenderAsPlayer(sender));
 
 		} else if (args.length == 1) {
 			try {
 				int plotID = Integer.parseInt(args[0]);
-				PlotManager.teleportToPlot(getCommandSenderAsPlayer(sender), new PlotManager(sender.getEntityWorld(), plotID).plotID);
-			} catch (NumberFormatException e) {
-				PlotManager.teleportToPlot(getCommandSenderAsPlayer(sender), new PlotManager(getPlayer(server, sender, args[0])).plotID);
-			}
-		} else {
-			EntityPlayer player1;
-			int id;
-			try {
-				int plotID = Integer.parseInt(args[0]);
-				PlotManager manager = new PlotManager(sender.getEntityWorld(), plotID);
-				if (manager.player == null)
-					throw new PlayerNotFoundException("Could not find player of plot id " + plotID, sender);
-				player1 = manager.player;
-			} catch (NumberFormatException e) {
-				player1 = getPlayer(server, sender, args[0]);
-			}
+				Plot plot = PlotRegistry.INSTANCE.getPlot(plotID);
 
-			PlotManager manager = new PlotManager(getPlayer(server, sender, args[1]));
-			if (manager.plotID < 0)
-				throw new PlayerNotFoundException("Could not find plot id for player" + args[1], sender);
-			id = manager.plotID;
+				if (plot == null) {
+					sender.sendMessage(new TextComponentString(TextFormatting.RED + "Plot id [" + plotID + "] does not exist."));
+				} else plot.teleportToPlot(getCommandSenderAsPlayer(sender));
+			} catch (NumberFormatException e) {
 
-			PlotManager.teleportToPlot(player1, id);
+				EntityPlayerMP player = getPlayer(server, sender, args[0]);
+
+				Plot plot = PlotRegistry.INSTANCE.getPlot(player.getUniqueID());
+				if (plot == null) {
+					sender.sendMessage(new TextComponentString(TextFormatting.RED + player.getName() + " does not have a plot."));
+				} else plot.teleportToPlot(getCommandSenderAsPlayer(sender));
+			}
 		}
 	}
 

@@ -1,0 +1,117 @@
+# Created by .ignore support plugin (hsz.mobi)
+### Gradle template
+.gradle
+/build/
+
+# Ignore Gradle GUI config
+gradle-app.setting
+
+# Avoid ignoring Gradle wrapper jar file (.jar files are usually ignored)
+!gradle-wrapper.jar
+
+# Cache of project
+.gradletasknamecache
+
+# # Work around https://youtrack.jetbrains.com/issue/IDEA-116898
+# gradle/wrapper/gradle-wrapper.properties
+### JetBrains template
+# Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm, CLion, Android Studio and Webstorm
+# Reference: https://intellij-support.jetbrains.com/hc/en-us/articles/206544839
+
+# User-specific stuff:
+.idea/**/workspace.xml
+.idea/**/tasks.xml
+.idea/dictionaries
+
+# Sensitive or high-churn files:
+.idea/**/dataSources/
+.idea/**/dataSources.ids
+.idea/**/dataSources.xml
+.idea/**/dataSources.local.xml
+.idea/**/sqlDataSources.xml
+.idea/**/dynamic.xml
+.idea/**/uiDesigner.xml
+
+# Gradle:
+.idea/**/gradle.xml
+.idea/**/libraries
+
+# CMake
+cmake-build-debug/
+
+# Mongo Explorer plugin:
+.idea/**/mongoSettings.xml
+
+## File-based project format:
+*.iws
+
+## Plugin-specific files:
+
+# IntelliJ
+out/
+
+# mpeltonen/sbt-idea plugin
+.idea_modules/
+
+# JIRA plugin
+atlassian-ide-plugin.xml
+
+# Cursive Clojure plugin
+.idea/replstate.xml
+
+# Crashlytics plugin (for Android Studio and IntelliJ)
+com_crashlytics_export_strings.xml
+crashlytics.properties
+crashlytics-build.properties
+fabric.properties
+.gradle/
+.idea/gradle.xml
+.idea/modules.xml
+.idea/modules/
+.idea/workspace.xml
+/.idea/
+run/config/
+run/crash-reports/
+run/logs/
+run/options.txt
+run/resourcepacks/
+run/saves/Copy of New World/
+run/saves/New World/
+run/saves/world/advancements/11e8c009-da15-3a5d-81f0-ba0017af511c.json
+run/saves/world/advancements/187217a2-f3ae-3640-aba9-fce2f2248422.json
+run/saves/world/advancements/21aef119-186c-31d8-89d6-c507e23ea041.json
+run/saves/world/advancements/67c0771c-0b10-3f2c-b5d7-77726e52853d.json
+run/saves/world/advancements/681f539b-8bb8-3f85-85e5-a2945f6c6539.json
+run/saves/world/advancements/a3e619b4-d03e-3df6-bc8e-533c5d67e6da.json
+run/saves/world/advancements/a9c0d951-c0b6-3353-a779-fe4259ce0834.json
+run/saves/world/data/advancements/
+run/saves/world/data/functions/
+run/saves/world/data/librarianlib
+run/saves/world/playerdata/11e8c009-da15-3a5d-81f0-ba0017af511c.dat
+run/saves/world/playerdata/187217a2-f3ae-3640-aba9-fce2f2248422.dat
+run/saves/world/playerdata/21aef119-186c-31d8-89d6-c507e23ea041.dat
+run/saves/world/playerdata/67c0771c-0b10-3f2c-b5d7-77726e52853d.dat
+run/saves/world/playerdata/681f539b-8bb8-3f85-85e5-a2945f6c6539.dat
+run/saves/world/playerdata/a3e619b4-d03e-3df6-bc8e-533c5d67e6da.dat
+run/saves/world/playerdata/a9c0d951-c0b6-3353-a779-fe4259ce0834.dat
+run/saves/world/region/r.24.1.mca
+run/saves/world/region/r.24.2.mca
+run/saves/world/region/r.25.1.mca
+run/saves/world/region/r.25.2.mca
+run/saves/world/region/r.8.0.mca
+run/saves/world/region/r.8.1.mca
+run/saves/world/stats/11e8c009-da15-3a5d-81f0-ba0017af511c.json
+run/saves/world/stats/187217a2-f3ae-3640-aba9-fce2f2248422.json
+run/saves/world/stats/21aef119-186c-31d8-89d6-c507e23ea041.json
+run/saves/world/stats/67c0771c-0b10-3f2c-b5d7-77726e52853d.json
+run/saves/world/stats/681f539b-8bb8-3f85-85e5-a2945f6c6539.json
+run/saves/world/stats/a3e619b4-d03e-3df6-bc8e-533c5d67e6da.json
+run/saves/world/stats/a9c0d951-c0b6-3353-a779-fe4259ce0834.json
+run/textures_0.png
+run/textures_1.png
+run/textures_2.png
+run/textures_3.png
+run/textures_4.png
+run/usercache.json
+run/usernamecache.json
+/run/

@@ -1,6 +1,6 @@
 package me.lordsaad.modeoff.api;
 
-import me.lordsaad.modeoff.Modeoff;
+import me.lordsaad.modeoff.ModeratorOff;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
@@ -18,7 +18,7 @@ public class PlotManager {
 	public UUID uuid;
 	@Nullable
 	public EntityPlayer player;
-	public int plotID = -1;
+	public int plotID;
 	public BlockPos corner1, corner2;
 
 	public PlotManager(@NotNull EntityPlayer player) {
@@ -36,7 +36,7 @@ public class PlotManager {
 
 		UUID uuid = PlotAssigningManager.INSTANCE.getUUIDForPlot(plotID);
 		if (uuid == null) {
-			Modeoff.logger.error("uuid for plot " + plotID + " could not be found.");
+			ModeratorOff.logger.error("uuid for plot " + plotID + " could not be found.");
 			return;
 		}
 		this.uuid = uuid;

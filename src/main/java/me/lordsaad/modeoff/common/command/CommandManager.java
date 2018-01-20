@@ -1,13 +1,10 @@
 package me.lordsaad.modeoff.common.command;
 
-import com.teamwizardry.librarianlib.features.network.PacketHandler;
-import me.lordsaad.modeoff.common.network.PacketManagerGui;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.NotNull;
@@ -44,9 +41,8 @@ public class CommandManager extends CommandBase {
 		if (sender instanceof EntityPlayer) player = getCommandSenderAsPlayer(sender);
 		else throw new WrongUsageException(getUsage(sender));
 
-		PacketHandler.NETWORK.sendTo(new PacketManagerGui(), (EntityPlayerMP) player);
+		//PacketHandler.NETWORK.sendTo(new PacketManagerGui(), (EntityPlayerMP) player);
 	}
-
 
 	@NotNull
 	@Override

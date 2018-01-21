@@ -1,34 +1,18 @@
 package me.lordsaad.modeoff.common;
 
-import com.teamwizardry.librarianlib.features.network.PacketHandler;
-import me.lordsaad.modeoff.ModeratorOff;
 import me.lordsaad.modeoff.api.plot.Plot;
 import me.lordsaad.modeoff.api.plot.PlotRegistry;
-import me.lordsaad.modeoff.common.network.PacketSyncPlots;
-import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.math.BlockPos;
-import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.fml.common.eventhandler.Event;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
-import java.util.HashSet;
-
 /**
  * Created by LordSaad.
  */
 public class EventHandler {
-
-	@SubscribeEvent
-	public void onWorldLoad(EntityJoinWorldEvent event) {
-		if (event.getEntity() instanceof EntityPlayerMP) {
-			ModeratorOff.logger.info("About to send plot data to " + event.getEntity().getName());
-			PacketHandler.NETWORK.sendTo(new PacketSyncPlots(new HashSet<>(PlotRegistry.INSTANCE.plots)), (EntityPlayerMP) event.getEntity());
-			ModeratorOff.logger.info("Done.");
-		}
-	}
 
 	@SubscribeEvent
 	public void leftClickBlock(PlayerInteractEvent.LeftClickBlock event) {

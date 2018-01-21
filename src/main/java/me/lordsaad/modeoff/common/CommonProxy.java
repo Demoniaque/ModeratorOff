@@ -1,9 +1,6 @@
 package me.lordsaad.modeoff.common;
 
-import com.teamwizardry.librarianlib.features.config.EasyConfigHandler;
 import me.lordsaad.modeoff.ModeratorOff;
-import me.lordsaad.modeoff.api.plot.PlotRegistry;
-import me.lordsaad.modeoff.api.rank.ThreadRankFetcher;
 import me.lordsaad.modeoff.client.gui.GuiHandler;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
@@ -11,6 +8,7 @@ import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 
+import javax.annotation.Nullable;
 import java.io.File;
 
 /**
@@ -18,24 +16,10 @@ import java.io.File;
  */
 public class CommonProxy {
 
-	public static File directory;
+	@Nullable
+	public static File directory = null;
 
 	public void preInit(FMLPreInitializationEvent event) {
-		EasyConfigHandler.init();
-
-		File configFolder = new File(event.getModConfigurationDirectory(), "/plots/");
-
-		if (!configFolder.exists()) {
-			ModeratorOff.logger.info(configFolder.getName() + " not found. Creating directory...");
-			if (!configFolder.mkdirs()) {
-				ModeratorOff.logger.error("SOMETHING WENT WRONG! Could not create config directory " + configFolder.getName());
-				return;
-			}
-			ModeratorOff.logger.info(configFolder.getName() + " has been created successfully!");
-		}
-
-		directory = configFolder;
-
 		MinecraftForge.EVENT_BUS.register(new EventHandler());
 	}
 
@@ -44,8 +28,6 @@ public class CommonProxy {
 	}
 
 	public void postInit(FMLPostInitializationEvent event) {
-		PlotRegistry.INSTANCE.setDirectory(directory);
-		PlotRegistry.INSTANCE.loadPlots();
-		new ThreadRankFetcher();
+
 	}
 }

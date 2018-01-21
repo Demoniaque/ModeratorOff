@@ -1,17 +1,19 @@
-package me.lordsaad.modeoff.api;
+package me.lordsaad.modeoff.api.plot;
 
 import com.google.gson.*;
 import me.lordsaad.modeoff.ModeratorOff;
 
 import javax.annotation.Nullable;
 import java.io.*;
-import java.util.*;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.UUID;
 
 public class PlotRegistry {
 
 	public final static PlotRegistry INSTANCE = new PlotRegistry();
 
-	public ArrayList<Plot> plots = new ArrayList<>();
+	public HashSet<Plot> plots = new HashSet<>();
 
 	private File directory;
 

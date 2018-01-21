@@ -1,10 +1,7 @@
 package me.lordsaad.modeoff;
 
 import me.lordsaad.modeoff.common.CommonProxy;
-import me.lordsaad.modeoff.common.command.CommandAssign;
-import me.lordsaad.modeoff.common.command.CommandManager;
-import me.lordsaad.modeoff.common.command.CommandRank;
-import me.lordsaad.modeoff.common.command.CommandTpPlot;
+import me.lordsaad.modeoff.common.command.CommandPlot;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
@@ -54,9 +51,6 @@ public class ModeratorOff {
 
 	@Mod.EventHandler
 	public void serverLoad(FMLServerStartingEvent event) {
-		event.registerServerCommand(new CommandAssign());
-		event.registerServerCommand(new CommandTpPlot());
-		event.registerServerCommand(new CommandManager());
-		event.registerServerCommand(new CommandRank());
+		event.registerServerCommand(new CommandPlot());
 	}
 }

@@ -2,8 +2,8 @@ package me.lordsaad.modeoff.common;
 
 import com.teamwizardry.librarianlib.features.network.PacketHandler;
 import me.lordsaad.modeoff.ModeratorOff;
-import me.lordsaad.modeoff.api.Plot;
-import me.lordsaad.modeoff.api.PlotRegistry;
+import me.lordsaad.modeoff.api.plot.Plot;
+import me.lordsaad.modeoff.api.plot.PlotRegistry;
 import me.lordsaad.modeoff.common.network.PacketSyncPlots;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.math.BlockPos;

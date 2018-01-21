@@ -4,15 +4,14 @@ import com.teamwizardry.librarianlib.features.autoregister.PacketRegister;
 import com.teamwizardry.librarianlib.features.network.PacketBase;
 import com.teamwizardry.librarianlib.features.saving.SaveMethodGetter;
 import com.teamwizardry.librarianlib.features.saving.SaveMethodSetter;
-import me.lordsaad.modeoff.api.Plot;
-import me.lordsaad.modeoff.api.PlotRegistry;
+import me.lordsaad.modeoff.api.plot.Plot;
+import me.lordsaad.modeoff.api.plot.PlotRegistry;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 import net.minecraftforge.fml.relauncher.Side;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 
 /**
@@ -58,6 +57,6 @@ public class PacketSyncPlots extends PacketBase {
 
 	@Override
 	public void handle(MessageContext messageContext) {
-		PlotRegistry.INSTANCE.plots = new ArrayList<>(plots);
+		PlotRegistry.INSTANCE.plots = plots;
 	}
 }

@@ -1,6 +1,8 @@
-package me.lordsaad.modeoff.api;
+package me.lordsaad.modeoff.api.plot;
 
 import com.teamwizardry.librarianlib.features.math.Vec2d;
+import me.lordsaad.modeoff.api.ConfigValues;
+import me.lordsaad.modeoff.api.Utils;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;

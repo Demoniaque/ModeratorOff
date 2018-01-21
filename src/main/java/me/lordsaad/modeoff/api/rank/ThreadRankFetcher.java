@@ -58,11 +58,19 @@ public class ThreadRankFetcher extends Thread {
 
 					if (object.has("id") && object.get("id").isJsonPrimitive()) {
 						String uuid = object.getAsJsonPrimitive("id").getAsJsonPrimitive().getAsString();
+
+						// Format uuid
+						uuid = uuid.substring(0, 8) + "-"
+								+ uuid.substring(8, 12) + "-"
+								+ uuid.substring(12, 16) + "-"
+								+ uuid.substring(16, 20) + "-"
+								+ uuid.substring(20);
+
 						RankRegistry.INSTANCE.rankMap.put(rank, UUID.fromString(uuid));
 
-						ModeratorOff.logger.info("      >| Found uuid for " + name + " -> " + uuid + ". Success!");
+						ModeratorOff.logger.info("     |> Found uuid for " + name + " -> " + uuid + ". Success!");
 					} else {
-						ModeratorOff.logger.info("      >| Could not find uuid for " + name + ".");
+						ModeratorOff.logger.info("     |> Could not find uuid for " + name + ".");
 					}
 
 				}

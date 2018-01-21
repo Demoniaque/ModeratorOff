@@ -36,9 +36,6 @@ public class CommonProxy {
 
 		directory = configFolder;
 
-		PlotRegistry.INSTANCE.setDirectory(directory);
-		PlotRegistry.INSTANCE.loadPlots();
-
 		MinecraftForge.EVENT_BUS.register(new EventHandler());
 	}
 
@@ -47,6 +44,8 @@ public class CommonProxy {
 	}
 
 	public void postInit(FMLPostInitializationEvent event) {
+		PlotRegistry.INSTANCE.setDirectory(directory);
+		PlotRegistry.INSTANCE.loadPlots();
 		new ThreadRankFetcher();
 	}
 }

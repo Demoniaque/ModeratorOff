@@ -52,7 +52,6 @@ public class ItemTeleport extends ItemMod {
 			return super.onItemRightClick(worldIn, playerIn, handIn);
 		}
 
-
 		if (!worldIn.isRemote) {
 			if (playerIn.isRiding()) playerIn.dismountRidingEntity();
 			if (playerIn.isBeingRidden()) playerIn.getPassengers().forEach(Entity::dismountRidingEntity);
@@ -62,7 +61,10 @@ public class ItemTeleport extends ItemMod {
 			else playerIn.setPositionAndUpdate(886.5, 200, 60.5);
 
 			playerIn.getCooldownTracker().setCooldown(this, 20);
-		} else playerIn.playSound(SoundEvents.BLOCK_NOTE_BELL, 1, 3f);
+		} else {
+			playerIn.sendMessage(new TextComponentString(TextFormatting.GRAY + "Teleporting to [" + TextFormatting.GREEN + type + TextFormatting.GRAY + "]"));
+			playerIn.playSound(SoundEvents.BLOCK_NOTE_BELL, 1, 3f);
+		}
 
 		return super.onItemRightClick(worldIn, playerIn, handIn);
 	}

@@ -13,6 +13,8 @@ import net.minecraft.network.play.server.SPacketPlayerAbilities;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -51,7 +53,11 @@ public class ItemSpeed extends ItemMod {
 		stack.setTagCompound(compound);
 
 
-		playerIn.playSound(SoundEvents.BLOCK_NOTE_BELL, 1, 1f + level / 4f);
+		if (worldIn.isRemote) {
+			playerIn.sendMessage(new TextComponentString(TextFormatting.GRAY + "Speed set to [" + TextFormatting.GREEN + (level + 1) + TextFormatting.GRAY + "]"));
+			playerIn.playSound(SoundEvents.BLOCK_NOTE_BELL, 1, 1f + level / 4f);
+		}
+
 		if (playerIn instanceof EntityPlayerMP) {
 			SPacketPlayerAbilities packet = new SPacketPlayerAbilities();
 			packet.setFlySpeed(0.05f * (level + 1));
@@ -92,12 +98,13 @@ public class ItemSpeed extends ItemMod {
 			level = compound.getInteger("level");
 		}
 
-		return "Increase Speed [x" + (level + 1) + "]";
+		return TextFormatting.GRAY + "Increase Speed [" + TextFormatting.GREEN + "x" + (level + 1) + TextFormatting.GRAY + "]";
 	}
 
 	@Override
 	public void addInformation(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
 		super.addInformation(stack, worldIn, tooltip, flagIn);
 		tooltip.add("Increase your fly and walk speed.");
+		tooltip.add("Right click to change speed.");
 	}
 }

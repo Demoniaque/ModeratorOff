@@ -1,5 +1,6 @@
 package me.lordsaad.modeoff.common;
 
+import me.lordsaad.modeoff.ModItems;
 import me.lordsaad.modeoff.ModeratorOff;
 import me.lordsaad.modeoff.client.gui.GuiHandler;
 import net.minecraftforge.common.MinecraftForge;
@@ -20,6 +21,9 @@ public class CommonProxy {
 	public static File directory = null;
 
 	public void preInit(FMLPreInitializationEvent event) {
+
+		ModItems.init();
+
 		MinecraftForge.EVENT_BUS.register(new EventHandler());
 	}
 

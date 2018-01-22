@@ -1,8 +1,11 @@
 package me.lordsaad.modeoff.common;
 
+import me.lordsaad.modeoff.ModItems;
 import me.lordsaad.modeoff.api.plot.Plot;
 import me.lordsaad.modeoff.api.plot.PlotRegistry;
+import me.lordsaad.modeoff.api.rank.RankRegistry;
 import net.minecraft.util.math.BlockPos;
+import net.minecraftforge.event.entity.item.ItemTossEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.world.BlockEvent;
@@ -15,8 +18,18 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 public class EventHandler {
 
 	@SubscribeEvent
+	public void toss(ItemTossEvent event) {
+		if (event.getEntityItem().getItem().getItem() == ModItems.SPEED
+				&& !event.getPlayer().inventory.hasItemStack(event.getEntityItem().getItem())) {
+			event.getPlayer().addItemStackToInventory(event.getEntityItem().getItem().copy());
+
+			event.getPlayer().world.removeEntity(event.getEntityItem());
+		}
+	}
+
+	@SubscribeEvent
 	public void leftClickBlock(PlayerInteractEvent.LeftClickBlock event) {
-	//	if (event.getEntityPlayer().getName().startsWith("Player")) return;
+		if (RankRegistry.INSTANCE.isAdmin(event.getEntityPlayer())) return;
 
 		Plot plot = PlotRegistry.INSTANCE.getPlot(event.getEntityPlayer().getUniqueID());
 
@@ -61,11 +74,11 @@ public class EventHandler {
 
 	@SubscribeEvent
 	public void onBreakBlock(BlockEvent.BreakEvent event) {
-	//	if (event.getPlayer().getName().startsWith("Player")) return;
+		if (RankRegistry.INSTANCE.isAdmin(event.getPlayer())) return;
 		Plot plot = PlotRegistry.INSTANCE.getPlot(event.getPlayer().getUniqueID());
 
 		if (plot == null) {
-		event.setCanceled(true);
+			event.setCanceled(true);
 			return;
 		}
 
@@ -96,7 +109,7 @@ public class EventHandler {
 
 	@SubscribeEvent
 	public void breakSpeed(PlayerEvent.BreakSpeed event) {
-	//	if (event.getEntityPlayer().getName().startsWith("Player")) return;
+		if (RankRegistry.INSTANCE.isAdmin(event.getEntityPlayer())) return;
 
 		Plot plot = PlotRegistry.INSTANCE.getPlot(event.getEntityPlayer().getUniqueID());
 
@@ -131,7 +144,7 @@ public class EventHandler {
 
 	@SubscribeEvent
 	public void place(BlockEvent.PlaceEvent event) {
-	//	if (event.getPlayer().getName().startsWith("Player")) return;
+		if (RankRegistry.INSTANCE.isAdmin(event.getPlayer())) return;
 
 		Plot plot = PlotRegistry.INSTANCE.getPlot(event.getPlayer().getUniqueID());
 

@@ -76,7 +76,7 @@ public class ServerProxy extends CommonProxy {
 				String line;
 				while ((line = r.readLine()) != null) {
 
-					ModeratorOff.logger.info("    >| Looking up '" + line + "'");
+					ModeratorOff.logger.info("    > Looking up '" + line + "'");
 
 					// GET PLAYER UUID FROM MOJANG
 					URL mojangAPI = new URL("https://api.mojang.com/users/profiles/minecraft/" + line);
@@ -92,7 +92,7 @@ public class ServerProxy extends CommonProxy {
 
 					JsonElement element = new JsonParser().parse(jsonString.toString());
 					if (element == null || !element.isJsonObject()) {
-						ModeratorOff.logger.info("      >| Could not find uuid for " + name + ".");
+						ModeratorOff.logger.info("      > Could not find uuid for " + line + ".");
 						continue;
 					}
 
@@ -110,9 +110,9 @@ public class ServerProxy extends CommonProxy {
 
 						RankRegistry.INSTANCE.rankMap.put(rank, UUID.fromString(uuid));
 
-						ModeratorOff.logger.info("     |> Found uuid for " + name + " -> " + uuid + ". Success!");
+						ModeratorOff.logger.info("      > Found uuid for " + line + " -> " + uuid + ". Success!");
 					} else {
-						ModeratorOff.logger.info("     |> Could not find uuid for " + name + ".");
+						ModeratorOff.logger.info("      > Could not find uuid for " + line + ".");
 					}
 
 				}

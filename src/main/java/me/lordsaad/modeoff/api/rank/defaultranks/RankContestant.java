@@ -20,4 +20,9 @@ public class RankContestant implements IRank {
 	public EnumPerm getPermission() {
 		return EnumPerm.CONTESTANT;
 	}
+
+	@Override
+	public boolean displaySeparately() {
+		return true;
+	}
 }

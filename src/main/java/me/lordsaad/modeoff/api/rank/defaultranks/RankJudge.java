@@ -23,4 +23,9 @@ public class RankJudge implements IRank {
 	public EnumPerm getPermission() {
 		return EnumPerm.ADMIN;
 	}
+
+	@Override
+	public boolean displaySeparately() {
+		return true;
+	}
 }

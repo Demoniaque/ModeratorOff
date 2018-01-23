@@ -21,4 +21,8 @@ public class RankAdmin implements IRank {
 		return EnumPerm.ADMIN;
 	}
 
+	@Override
+	public boolean displaySeparately() {
+		return true;
+	}
 }

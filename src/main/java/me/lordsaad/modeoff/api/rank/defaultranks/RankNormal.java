@@ -13,11 +13,16 @@ public class RankNormal implements IRank {
 
 	@Override
 	public TextFormatting getColor() {
-		return TextFormatting.GRAY;
+		return TextFormatting.DARK_GRAY;
 	}
 
 	@Override
 	public EnumPerm getPermission() {
 		return EnumPerm.NONE;
+	}
+
+	@Override
+	public boolean displaySeparately() {
+		return false;
 	}
 }

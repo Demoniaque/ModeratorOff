@@ -3,8 +3,12 @@ package me.lordsaad.modeoff.common;
 import me.lordsaad.modeoff.ModItems;
 import me.lordsaad.modeoff.api.plot.Plot;
 import me.lordsaad.modeoff.api.plot.PlotRegistry;
+import me.lordsaad.modeoff.api.rank.IRank;
 import me.lordsaad.modeoff.api.rank.RankRegistry;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.TextFormatting;
+import net.minecraftforge.event.ServerChatEvent;
 import net.minecraftforge.event.entity.item.ItemTossEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
@@ -18,8 +22,24 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 public class EventHandler {
 
 	@SubscribeEvent
+	public void chat(ServerChatEvent event) {
+		IRank rank = RankRegistry.INSTANCE.getRank(event.getPlayer());
+
+		if (rank == null) return;
+
+		String newMessage = TextFormatting.GRAY + "[";
+		if (rank.displaySeparately()) {
+			newMessage += rank.getColor() + rank.getName() + " ";
+		}
+		newMessage += TextFormatting.RESET + event.getUsername() + TextFormatting.GRAY + "] > " + TextFormatting.RESET + event.getMessage();
+
+		event.setComponent(new TextComponentString(newMessage));
+	}
+
+	@SubscribeEvent
 	public void toss(ItemTossEvent event) {
-		if (event.getEntityItem().getItem().getItem() == ModItems.SPEED
+		if ((event.getEntityItem().getItem().getItem() == ModItems.SPEED
+				|| event.getEntityItem().getItem().getItem() == ModItems.TELEPORT)
 				&& !event.getPlayer().inventory.hasItemStack(event.getEntityItem().getItem())) {
 			event.getPlayer().addItemStackToInventory(event.getEntityItem().getItem().copy());
 

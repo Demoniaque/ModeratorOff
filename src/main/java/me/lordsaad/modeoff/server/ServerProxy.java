@@ -61,7 +61,7 @@ public class ServerProxy extends CommonProxy {
 		}
 	}
 
-	private void fetchRanks() {
+	public static void fetchRanks() {
 		ModeratorOff.logger.info("<<========================================================================>>");
 		ModeratorOff.logger.info("About to fetch ranks...");
 		try {

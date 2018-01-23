@@ -12,4 +12,6 @@ public interface IRank {
 	TextFormatting getColor();
 
 	EnumPerm getPermission();
+
+	boolean displaySeparately();
 }

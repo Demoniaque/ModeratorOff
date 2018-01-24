@@ -10,7 +10,7 @@ public final class ConfigValues {
 	public static int x = 864;
 	public static int y = 35;
 	public static int z = 38;
-	public static int plotSize = 34;
+	public static int plotSize = 35;
 	public static int plotMarginWidth = 11;
 	public static int plotWorldDimensionID = 0;
 

@@ -81,6 +81,12 @@ public class PlotRegistry {
 		}
 		object.add("owners", owners);
 
+		JsonArray tags = new JsonArray();
+		for (String tag : plot.getTags()) {
+			tags.add(tag);
+		}
+		object.add("tags", tags);
+
 		File file = new File(directory, "plot_" + plot.getID() + ".json");
 		if (file.exists()) {
 			file.delete();
@@ -153,6 +159,15 @@ public class PlotRegistry {
 					}
 
 					Plot plot = new Plot(id, uuids);
+
+					if (object.has("tags")) {
+						JsonArray tagsArray = object.getAsJsonArray("tags");
+						for (JsonElement tagElement : tagsArray) {
+							if (!tagElement.isJsonPrimitive()) {
+								plot.addTag(tagElement.getAsString());
+							}
+						}
+					}
 
 					plots.add(plot);
 					count++;

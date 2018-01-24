@@ -69,6 +69,7 @@ public class RankRegistry {
 
 			rankMap.forEach((iRank, uuid) -> {
 				if (uuid.equals(event.getEntity().getUniqueID())) {
+					if (cap.getRank() == iRank) return;
 					cap.setRank(iRank);
 					cap.dataChanged(event.getEntity());
 				}

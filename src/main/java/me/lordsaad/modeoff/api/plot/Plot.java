@@ -21,16 +21,19 @@ public class Plot implements INBTSerializable<NBTTagCompound> {
 	private int id;
 	private HashSet<UUID> owners;
 	private PlotDimensions dimensions;
+	private HashSet<String> tags;
 
 	public Plot(int id, @NotNull HashSet<UUID> owners) {
 		this.id = id;
 		this.owners = owners;
 
 		dimensions = new PlotDimensions(id);
+		tags = new HashSet<>();
 	}
 
 	public Plot() {
 		owners = new HashSet<>();
+		tags = new HashSet<>();
 	}
 
 	public void teleportToPlot(EntityPlayer player) {
@@ -67,6 +70,18 @@ public class Plot implements INBTSerializable<NBTTagCompound> {
 		return dimensions;
 	}
 
+	public void addTag(String tag) {
+		tags.add(tag);
+	}
+
+	public void removeTag(String tag) {
+		tags.remove(tag);
+	}
+
+	public boolean hasTag(String tag) {
+		return tags.contains(tag);
+	}
+
 	@Override
 	public NBTTagCompound serializeNBT() {
 		NBTTagCompound compound = new NBTTagCompound();
@@ -76,8 +91,14 @@ public class Plot implements INBTSerializable<NBTTagCompound> {
 		for (UUID uuid : this.owners) {
 			owners.appendTag(new NBTTagString(uuid.toString()));
 		}
-
 		compound.setTag("owners", owners);
+
+		NBTTagList tags = new NBTTagList();
+		for (String tag : this.tags) {
+			tags.appendTag(new NBTTagString(tag));
+		}
+		compound.setTag("tags", tags);
+
 		return compound;
 	}
 
@@ -94,7 +115,22 @@ public class Plot implements INBTSerializable<NBTTagCompound> {
 				owners.add(UUID.fromString(owner));
 			}
 		}
+
+		if (nbt.hasKey("tags")) {
+
+			NBTTagList list = nbt.getTagList("tags", Constants.NBT.TAG_STRING);
+
+			for (int i = 0; i < list.tagCount(); i++) {
+				String tag = list.getStringTagAt(i);
+				tags.add(tag);
+			}
+		}
+
 		dimensions = new PlotDimensions(getID());
+	}
+
+	public HashSet<String> getTags() {
+		return tags;
 	}
 
 	public class PlotDimensions {

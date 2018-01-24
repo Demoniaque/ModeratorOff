@@ -5,12 +5,12 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.util.EnumMap;
+import java.util.HashSet;
 
 /**
  * Created by LordSaad.
@@ -19,61 +19,53 @@ import java.util.EnumMap;
 public class AreaCacher {
 
 	public EnumMap<BlockRenderLayer, HashMultimap<IBlockState, BlockPos>> blocks = new EnumMap<>(BlockRenderLayer.class);
-	public BlockPos[][] topGrid;
+
+	private HashSet<BlockPos> tempPosCache = new HashSet<>();
 
 	/**
 	 * Will cache the area from the crane selected.
 	 *
 	 * @param world  The world object.
 	 * @param origin A block in the crane.
-	 * @param width  The width of the crane.
-	 * @param height The height of the crane.
 	 */
-	public AreaCacher(World world, BlockPos origin, int width, int height) {
-		IBlockState[][][] tempStateCache = new IBlockState[width * 2][(height)][width * 2];
-		topGrid = new BlockPos[width * 2][width * 2];
+	public AreaCacher(World world, BlockPos origin) {
+		int width = ConfigValues.plotSize;
+		IBlockState[][][] tempStateCache = new IBlockState[width * 2][100][width * 2];
 
 		// FIRST ITERATION
 		// Save everything. Check surroundings in second iteration.
+		BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
 		for (int i = -width; i < width; i++) {
-			for (int j = -width; j < width; j++) {
-				for (int k = -height; k < height; k++) {
-					BlockPos pos = new BlockPos(origin.getX() + i, origin.getY() + k, origin.getZ() + j);
-
-					if (!world.isBlockLoaded(pos)) continue;
-
-					if (world.isAirBlock(pos)) continue;
+			for (int j = 0; j < 100; j++) {
+				for (int k = -width; k < width; k++) {
+					pos.setPos(origin.getX() + i, origin.getY() + k, origin.getZ() + j);
 
 					IBlockState state = world.getBlockState(pos);
-
-					BlockPos sub = pos.subtract(origin).add(width, height, width);
-					tempStateCache[sub.getX()][sub.getY()][sub.getZ()] = state;
+					tempStateCache[i + width][j][k + width] = state;
 				}
 			}
 		}
 
 		// SECOND ITERATION
 		// Check surrounding iterations
-		for (int i = 0; i < tempStateCache.length; i++) {
-			for (int j = 0; j < tempStateCache[0].length; j++) {
-				for (int k = 0; k < tempStateCache.length; k++) {
-					IBlockState state = tempStateCache[i][j][k];
+		BlockPos.MutableBlockPos offset = new BlockPos.MutableBlockPos();
+		for (int i = -width; i < width; i++) {
+			for (int j = 0; j < 100; j++) {
+				for (int k = -width; k < width; k++) {
+					IBlockState state = tempStateCache[i + width][j][k + width];
 					if (state == null) continue;
 
 					boolean surrounded = true;
 					for (EnumFacing facing : EnumFacing.VALUES) {
-						BlockPos offset = new BlockPos(i, j, k).offset(facing);
-						if (!world.isBlockLoaded(offset)) continue;
-						if (offset.getX() < 0
-								|| offset.getY() < 0
-								|| offset.getZ() < 0
-								|| offset.getX() >= tempStateCache.length
+						offset.setPos(i, j, k).offset(facing);
+						if (offset.getX() + width >= tempStateCache.length
 								|| offset.getY() >= tempStateCache[0].length
-								|| offset.getZ() >= tempStateCache.length) {
-							continue;
+								|| offset.getZ() + width >= tempStateCache.length) {
+							surrounded = false;
+							break;
 						}
 
-						IBlockState offsetState = tempStateCache[offset.getX()][offset.getY()][offset.getZ()];
+						IBlockState offsetState = tempStateCache[offset.getX() + width][offset.getY()][offset.getZ() + width];
 						if (offsetState == null) {
 							surrounded = false;
 							break;
@@ -92,14 +84,11 @@ public class AreaCacher {
 					}
 
 					if (!surrounded) {
-						BlockPos pos = new BlockPos(i, j, k).subtract(new Vec3i(width, height, width)).add(origin);
-
-						topGrid[i][k] = new BlockPos(pos.getX(), origin.getY(), pos.getZ());
-
+						pos.setPos(i - width, j, k - width);//.subtract(new Vec3i(width, 0, width)).add(origin);
 						BlockRenderLayer layer = state.getBlock().getBlockLayer();
 						HashMultimap<IBlockState, BlockPos> multimap = blocks.get(layer);
 						if (multimap == null) multimap = HashMultimap.create();
-						multimap.put(state, pos);
+						multimap.put(state, pos.toImmutable());
 						blocks.put(layer, multimap);
 					}
 				}

@@ -49,11 +49,11 @@ public class EventHandler {
 
 	@SubscribeEvent
 	public void leftClickBlock(PlayerInteractEvent.LeftClickBlock event) {
-		if (RankRegistry.INSTANCE.isAdmin(event.getEntityPlayer())) return;
+		//	if (RankRegistry.INSTANCE.isAdmin(event.getEntityPlayer())) return;
 
 		Plot plot = PlotRegistry.INSTANCE.getPlot(event.getEntityPlayer().getUniqueID());
 
-		if (plot == null) {
+		if (plot == null || plot.hasTag("lock_plot")) {
 			event.setUseItem(Event.Result.DENY);
 			event.setUseBlock(Event.Result.DENY);
 			event.setCanceled(true);
@@ -62,7 +62,7 @@ public class EventHandler {
 
 		Plot.PlotDimensions dimensions = plot.getDimensions();
 
-		if (isWithinBounds(dimensions.getCorner1(), dimensions.getCorner2(), event.getPos())) {
+		if (plot.hasTag("edit_plot_break") || isWithinBounds(dimensions.getCorner1(), dimensions.getCorner2(), event.getPos())) {
 			event.setUseItem(Event.Result.DENY);
 			event.setUseBlock(Event.Result.DENY);
 			event.setCanceled(true);
@@ -94,17 +94,17 @@ public class EventHandler {
 
 	@SubscribeEvent
 	public void onBreakBlock(BlockEvent.BreakEvent event) {
-		if (RankRegistry.INSTANCE.isAdmin(event.getPlayer())) return;
+		//	if (RankRegistry.INSTANCE.isAdmin(event.getPlayer())) return;
 		Plot plot = PlotRegistry.INSTANCE.getPlot(event.getPlayer().getUniqueID());
 
-		if (plot == null) {
+		if (plot == null || plot.hasTag("lock_plot")) {
 			event.setCanceled(true);
 			return;
 		}
 
 		Plot.PlotDimensions dimensions = plot.getDimensions();
 
-		if (isWithinBounds(dimensions.getCorner1(), dimensions.getCorner2(), event.getPos())) {
+		if (plot.hasTag("edit_plot_break") || isWithinBounds(dimensions.getCorner1(), dimensions.getCorner2(), event.getPos())) {
 			event.setCanceled(true);
 		}
 
@@ -129,18 +129,18 @@ public class EventHandler {
 
 	@SubscribeEvent
 	public void breakSpeed(PlayerEvent.BreakSpeed event) {
-		if (RankRegistry.INSTANCE.isAdmin(event.getEntityPlayer())) return;
+		//	if (RankRegistry.INSTANCE.isAdmin(event.getEntityPlayer())) return;
 
 		Plot plot = PlotRegistry.INSTANCE.getPlot(event.getEntityPlayer().getUniqueID());
 
-		if (plot == null) {
+		if (plot == null || plot.hasTag("lock_plot")) {
 			event.setCanceled(true);
 			return;
 		}
 
 		Plot.PlotDimensions dimensions = plot.getDimensions();
 
-		if (isWithinBounds(dimensions.getCorner1(), dimensions.getCorner2(), event.getPos())) {
+		if (plot.hasTag("edit_plot_break") || isWithinBounds(dimensions.getCorner1(), dimensions.getCorner2(), event.getPos())) {
 			event.setCanceled(true);
 		}
 
@@ -164,18 +164,18 @@ public class EventHandler {
 
 	@SubscribeEvent
 	public void place(BlockEvent.PlaceEvent event) {
-		if (RankRegistry.INSTANCE.isAdmin(event.getPlayer())) return;
+		//	if (RankRegistry.INSTANCE.isAdmin(event.getPlayer())) return;
 
 		Plot plot = PlotRegistry.INSTANCE.getPlot(event.getPlayer().getUniqueID());
 
-		if (plot == null) {
+		if (plot == null || plot.hasTag("lock_plot")) {
 			event.setCanceled(true);
 			return;
 		}
 
 		Plot.PlotDimensions dimensions = plot.getDimensions();
 
-		if (isWithinBounds(dimensions.getCorner1(), dimensions.getCorner2(), event.getPos())) {
+		if (plot.hasTag("edit_plot_place") || isWithinBounds(dimensions.getCorner1(), dimensions.getCorner2(), event.getPos())) {
 			event.setCanceled(true);
 		}
 

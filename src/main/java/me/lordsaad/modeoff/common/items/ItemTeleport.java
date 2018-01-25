@@ -1,6 +1,7 @@
 package me.lordsaad.modeoff.common.items;
 
 import com.teamwizardry.librarianlib.features.base.item.ItemMod;
+import me.lordsaad.modeoff.ModeratorOff;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
@@ -27,45 +28,50 @@ public class ItemTeleport extends ItemMod {
 	public ActionResult<ItemStack> onItemRightClick(World worldIn, EntityPlayer playerIn, EnumHand handIn) {
 		ItemStack stack = playerIn.getHeldItem(handIn);
 
-		NBTTagCompound compound;
-		if (stack.getTagCompound() == null) compound = new NBTTagCompound();
-		else compound = stack.getTagCompound();
+		if (worldIn.isRemote) {
+			playerIn.openGui(ModeratorOff.instance, 0, worldIn, 0, 0, 0);
+		}
 
-		String type;
-		if (!compound.hasKey("type")) compound.setString("type", "spawn");
+		if (false) {
+			NBTTagCompound compound;
+			if (stack.getTagCompound() == null) compound = new NBTTagCompound();
+			else compound = stack.getTagCompound();
 
-		type = compound.getString("type");
+			String type;
+			if (!compound.hasKey("type")) compound.setString("type", "spawn");
 
-		if (playerIn.isSneaking()) {
-			if (type.equalsIgnoreCase("spawn")) {
-				type = "plots";
-			} else type = "spawn";
+			type = compound.getString("type");
 
-			if (worldIn.isRemote) {
-				playerIn.sendMessage(new TextComponentString(TextFormatting.GRAY + "Teleport set to [" + TextFormatting.GREEN + type + TextFormatting.GRAY + "]"));
-				playerIn.playSound(SoundEvents.BLOCK_NOTE_BELL, 1, 1);
+			if (playerIn.isSneaking()) {
+				if (type.equalsIgnoreCase("spawn")) {
+					type = "plots";
+				} else type = "spawn";
+
+				if (worldIn.isRemote) {
+					playerIn.sendMessage(new TextComponentString(TextFormatting.GRAY + "Teleport set to [" + TextFormatting.GREEN + type + TextFormatting.GRAY + "]"));
+					playerIn.playSound(SoundEvents.BLOCK_NOTE_BELL, 1, 1);
+				}
+
+				compound.setString("type", type);
+				stack.setTagCompound(compound);
+
+				return super.onItemRightClick(worldIn, playerIn, handIn);
 			}
 
-			compound.setString("type", type);
-			stack.setTagCompound(compound);
+			if (!worldIn.isRemote) {
+				if (playerIn.isRiding()) playerIn.dismountRidingEntity();
+				if (playerIn.isBeingRidden()) playerIn.getPassengers().forEach(Entity::dismountRidingEntity);
+				if (playerIn.dimension != 0) playerIn.changeDimension(0);
 
-			return super.onItemRightClick(worldIn, playerIn, handIn);
+				if (type.equalsIgnoreCase("spawn")) playerIn.setPositionAndUpdate(22.5, 200, 9.5);
+				else playerIn.setPositionAndUpdate(886.5, 200, 60.5);
+
+				playerIn.getCooldownTracker().setCooldown(this, 20);
+			} else {
+				playerIn.sendMessage(new TextComponentString(TextFormatting.GRAY + "Teleporting to [" + TextFormatting.GREEN + type + TextFormatting.GRAY + "]"));
+				playerIn.playSound(SoundEvents.BLOCK_NOTE_BELL, 1, 3f);
+			}
 		}
-
-		if (!worldIn.isRemote) {
-			if (playerIn.isRiding()) playerIn.dismountRidingEntity();
-			if (playerIn.isBeingRidden()) playerIn.getPassengers().forEach(Entity::dismountRidingEntity);
-			if (playerIn.dimension != 0) playerIn.changeDimension(0);
-
-			if (type.equalsIgnoreCase("spawn")) playerIn.setPositionAndUpdate(22.5, 200, 9.5);
-			else playerIn.setPositionAndUpdate(886.5, 200, 60.5);
-
-			playerIn.getCooldownTracker().setCooldown(this, 20);
-		} else {
-			playerIn.sendMessage(new TextComponentString(TextFormatting.GRAY + "Teleporting to [" + TextFormatting.GREEN + type + TextFormatting.GRAY + "]"));
-			playerIn.playSound(SoundEvents.BLOCK_NOTE_BELL, 1, 3f);
-		}
-
 		return super.onItemRightClick(worldIn, playerIn, handIn);
 	}
 

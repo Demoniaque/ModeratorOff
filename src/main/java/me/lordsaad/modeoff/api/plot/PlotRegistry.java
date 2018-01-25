@@ -70,6 +70,7 @@ public class PlotRegistry {
 
 	public void savePlot(int plotID) {
 		Plot plot = getPlot(plotID);
+		if (plot == null) return;
 
 		JsonObject object = new JsonObject();
 
@@ -88,13 +89,12 @@ public class PlotRegistry {
 		object.add("tags", tags);
 
 		File file = new File(directory, "plot_" + plot.getID() + ".json");
-		if (file.exists()) {
-			file.delete();
-		}
 
-		try {
-			file.createNewFile();
-		} catch (IOException ignored) {
+		if (!file.exists()) {
+			try {
+				file.createNewFile();
+			} catch (IOException ignored) {
+			}
 		}
 
 		try {

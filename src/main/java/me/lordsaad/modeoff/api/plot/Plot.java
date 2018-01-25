@@ -72,10 +72,12 @@ public class Plot implements INBTSerializable<NBTTagCompound> {
 
 	public void addTag(String tag) {
 		tags.add(tag);
+		PlotRegistry.INSTANCE.savePlot(getID());
 	}
 
 	public void removeTag(String tag) {
 		tags.remove(tag);
+		PlotRegistry.INSTANCE.savePlot(getID());
 	}
 
 	public boolean hasTag(String tag) {

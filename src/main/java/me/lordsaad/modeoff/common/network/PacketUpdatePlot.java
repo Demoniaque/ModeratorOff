@@ -42,6 +42,8 @@ public class PacketUpdatePlot extends PacketBase {
 
 	@Override
 	public void handle(MessageContext messageContext) {
+		if (plot == null) return;
 		Objects.requireNonNull(PlotRegistry.INSTANCE.getPlot(plot.getID())).deserializeNBT(plot.serializeNBT());
+		PlotRegistry.INSTANCE.savePlot(plot.getID());
 	}
 }

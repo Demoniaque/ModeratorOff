@@ -37,6 +37,19 @@ public class CommonProxy {
 
 		MinecraftForge.EVENT_BUS.register(new EventHandler());
 		MinecraftForge.EVENT_BUS.register(RankRegistry.INSTANCE);
+
+		File configFolder = new File(event.getModConfigurationDirectory(), "/plots/");
+
+		if (!configFolder.exists()) {
+			ModeratorOff.logger.info(configFolder.getName() + " not found. Creating directory...");
+			if (!configFolder.mkdirs()) {
+				ModeratorOff.logger.error("SOMETHING WENT WRONG! Could not create config directory " + configFolder.getName());
+				return;
+			}
+			ModeratorOff.logger.info(configFolder.getName() + " has been created successfully!");
+		}
+
+		directory = configFolder;
 	}
 
 	public void init(FMLInitializationEvent event) {

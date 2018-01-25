@@ -5,6 +5,7 @@ import net.minecraft.init.Blocks;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.ChunkCache;
 import net.minecraft.world.World;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Created by Gegy
@@ -19,9 +20,10 @@ public class PlotChunkCache extends ChunkCache {
 		max = new BlockPos(Math.max(from.getX(), to.getX()), Math.max(from.getY(), to.getY()), Math.max(from.getZ(), to.getZ()));
 	}
 
+	@NotNull
 	@Override
 	public IBlockState getBlockState(BlockPos pos) {
-		if (pos.getX() >= min.getX() && pos.getY() >= min.getY() && pos.getZ() >= min.getZ() && pos.getX() < max.getX() && pos.getY() < max.getY() && pos.getZ() < max.getZ()) {
+		if (pos.getX() >= min.getX() && pos.getZ() >= min.getZ() && pos.getX() < max.getX() && pos.getZ() < max.getZ()) {
 			return super.getBlockState(pos);
 		}
 		return Blocks.AIR.getDefaultState();

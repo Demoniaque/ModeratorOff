@@ -4,12 +4,12 @@ import me.lordsaad.modeoff.api.permissions.Permission;
 import me.lordsaad.modeoff.api.rank.IRank;
 import net.minecraft.util.text.TextFormatting;
 
-import java.util.Collection;
 import java.util.HashSet;
+import java.util.Set;
 
 public class RankNormal implements IRank {
 
-	private HashSet<Permission> permissions = new HashSet<>();
+	private Set<Permission> permissions = new HashSet<>();
 
 	public RankNormal() {
 	}
@@ -30,7 +30,7 @@ public class RankNormal implements IRank {
 	}
 
 	@Override
-	public Collection<Permission> getPermissions() {
+	public Set<Permission> getPermissions() {
 		return permissions;
 	}
 

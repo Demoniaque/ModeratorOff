@@ -5,12 +5,12 @@ import me.lordsaad.modeoff.api.rank.IRank;
 import net.minecraft.util.text.TextFormatting;
 
 import javax.annotation.Nullable;
-import java.util.Collection;
 import java.util.HashSet;
+import java.util.Set;
 
 public class RankSponsor implements IRank {
 
-	private HashSet<Permission> permissions = new HashSet<>();
+	private Set<Permission> permissions = new HashSet<>();
 
 	public RankSponsor() {
 	}
@@ -32,8 +32,8 @@ public class RankSponsor implements IRank {
 	}
 
 	@Override
-	public Collection<Permission> getPermissions() {
-		return null;
+	public Set<Permission> getPermissions() {
+		return permissions;
 	}
 
 	@Override

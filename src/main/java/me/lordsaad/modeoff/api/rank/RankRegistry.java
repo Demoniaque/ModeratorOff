@@ -8,18 +8,15 @@ import me.lordsaad.modeoff.api.capability.IModoffCapability;
 import me.lordsaad.modeoff.api.capability.ModoffCapabilityProvider;
 import me.lordsaad.modeoff.api.permissions.Permission;
 import me.lordsaad.modeoff.api.permissions.PermissionRegistry;
-import me.lordsaad.modeoff.api.rank.defaultranks.RankAdmin;
-import me.lordsaad.modeoff.api.rank.defaultranks.RankJudge;
-import me.lordsaad.modeoff.api.rank.defaultranks.RankNormal;
-import me.lordsaad.modeoff.api.rank.defaultranks.RankSponsor;
+import me.lordsaad.modeoff.api.rank.defaultranks.*;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.UUID;
@@ -35,10 +32,11 @@ public class RankRegistry {
 
 	private RankRegistry() {
 		int id = 0;
-		ranks.put(id++, new RankAdmin());
-		ranks.put(id++, new RankNormal());
-		ranks.put(id++, new RankJudge());
-		ranks.put(id, new RankSponsor());
+		ranks.put(id++, DefaultRanks.ADMIN);
+		ranks.put(id++, DefaultRanks.CONTESTANT);
+		ranks.put(id++, DefaultRanks.NORMAL);
+		ranks.put(id++, DefaultRanks.SPONSOR);
+		ranks.put(id, DefaultRanks.JUDGE);
 	}
 
 	public boolean isAdmin(EntityPlayer player) {
@@ -50,10 +48,10 @@ public class RankRegistry {
 		return cap == null ? Collections.emptySet() : cap.getRank().getPermissions();
 	}
 
-	@Nullable
+	@NotNull
 	public IRank getRank(EntityPlayer player) {
 		IModoffCapability cap = ModoffCapabilityProvider.getCap(player);
-		return cap == null ? null : cap.getRank();
+		return cap == null ? DefaultRanks.NORMAL : cap.getRank();
 	}
 
 	@SubscribeEvent
@@ -79,5 +77,14 @@ public class RankRegistry {
 				}
 			});
 		}
+	}
+
+	public static final class DefaultRanks {
+
+		public static final RankAdmin ADMIN = new RankAdmin();
+		public static final RankContestant CONTESTANT = new RankContestant();
+		public static final RankJudge JUDGE = new RankJudge();
+		public static final RankNormal NORMAL = new RankNormal();
+		public static final RankSponsor SPONSOR = new RankSponsor();
 	}
 }

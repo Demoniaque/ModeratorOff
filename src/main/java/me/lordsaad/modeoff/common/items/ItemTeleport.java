@@ -25,8 +25,9 @@ public class ItemTeleport extends ItemMod {
 		super("teleport");
 	}
 
+	@NotNull
 	@Override
-	public ActionResult<ItemStack> onItemRightClick(World worldIn, EntityPlayer playerIn, EnumHand handIn) {
+	public ActionResult<ItemStack> onItemRightClick(World worldIn, EntityPlayer playerIn, @NotNull EnumHand handIn) {
 		ItemStack stack = playerIn.getHeldItem(handIn);
 
 		NBTTagCompound compound;

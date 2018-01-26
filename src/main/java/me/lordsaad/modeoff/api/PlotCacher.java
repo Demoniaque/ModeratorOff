@@ -28,28 +28,18 @@ public class PlotCacher {
 	public PlotCacher(IBlockAccess world, Plot plot) {
 		Plot.PlotDimensions dimensions = plot.getDimensions();
 
-		//BlockPos min = new BlockPos(Math.min(dimensions.getCorner1().getX(), dimensions.getCorner2().getX()), Math.min(dimensions.getCorner1().getY(), dimensions.getCorner2().getY()), Math.min(dimensions.getCorner1().getZ(), dimensions.getCorner2().getZ()));
-		//BlockPos max = new BlockPos(Math.max(dimensions.getCorner1().getX(), dimensions.getCorner2().getX()), Math.max(dimensions.getCorner1().getY(), dimensions.getCorner2().getY()), Math.max(dimensions.getCorner1().getZ(), dimensions.getCorner2().getZ()));
+		for (BlockPos pos : plot.getDimensions().getAllBlocks()) {
+			IBlockState state = world.getBlockState(pos);
 
-		BlockPos plotPos = new BlockPos(plot.getPlotPos().getXi(), ConfigValues.y, plot.getPlotPos().getYi());
-		BlockPos min = dimensions.getCorner1();//new BlockPos(Math.min(dimensions.getCorner1().getX(), dimensions.getCorner2().getX()), Math.min(dimensions.getCorner1().getY(), dimensions.getCorner2().getY()), Math.min(dimensions.getCorner1().getZ(), dimensions.getCorner2().getZ()));
-		BlockPos max = dimensions.getCorner2();//new BlockPos(Math.max(dimensions.getCorner1().getX(), dimensions.getCorner2().getX()), Math.max(dimensions.getCorner1().getY(), dimensions.getCorner2().getY()), Math.max(dimensions.getCorner1().getZ(), dimensions.getCorner2().getZ()));
+			if (state.getBlock() == Blocks.AIR) continue;
 
-		BlockPos.MutableBlockPos blockPos = new BlockPos.MutableBlockPos();
-		for (int i = min.getX() - 3; i < max.getX() + 2; i++) {
-			for (int j = 0; j < 200; j++) {
-				for (int k = min.getZ() - 3; k < max.getZ() + 2; k++) {
-					blockPos.setPos(i, j, k);
-
-					IBlockState state = world.getBlockState(blockPos);
-
-					if (state.getBlock() == Blocks.AIR) continue;
-
-					tmp.put(blockPos.toLong(), state);
-				}
-			}
+			tmp.put(pos.toLong(), state);
 		}
 
+		BlockPos min = dimensions.getCorner1();
+		BlockPos max = dimensions.getCorner2();
+
+		BlockPos.MutableBlockPos blockPos = new BlockPos.MutableBlockPos();
 		for (Long pos : tmp.keySet()) {
 			IBlockState state = tmp.get(pos);
 

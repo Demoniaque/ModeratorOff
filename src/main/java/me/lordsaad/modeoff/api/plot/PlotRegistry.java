@@ -7,7 +7,6 @@ import com.google.gson.JsonParser;
 import com.google.gson.internal.Streams;
 import com.google.gson.stream.JsonWriter;
 import me.lordsaad.modeoff.ModeratorOff;
-import me.lordsaad.modeoff.api.Utils;
 import me.lordsaad.modeoff.api.permissions.Permission;
 import me.lordsaad.modeoff.api.permissions.PermissionRegistry;
 import net.minecraft.util.math.BlockPos;
@@ -67,8 +66,7 @@ public class PlotRegistry {
 	@Nullable
 	public Plot findPlot(BlockPos pos) {
 		for (Plot plot : plots) {
-			Plot.PlotDimensions dimensions = plot.getDimensions();
-			if (Utils.isWithinBounds(dimensions.getCorner1(), dimensions.getCorner2(), pos))
+			if (plot.getDimensions().isBlockInside(pos))
 				return plot;
 		}
 		return null;

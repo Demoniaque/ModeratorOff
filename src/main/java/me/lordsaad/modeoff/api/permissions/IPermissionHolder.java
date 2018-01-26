@@ -1,10 +1,10 @@
 package me.lordsaad.modeoff.api.permissions;
 
-import java.util.Collection;
+import java.util.Set;
 
 public interface IPermissionHolder {
 
-	Collection<Permission> getPermissions();
+	Set<Permission> getPermissions();
 
 	void addPermission(Permission permission);
 

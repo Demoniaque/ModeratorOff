@@ -6,12 +6,12 @@ import me.lordsaad.modeoff.api.rank.IRank;
 import net.minecraft.util.text.TextFormatting;
 
 import javax.annotation.Nullable;
-import java.util.Collection;
 import java.util.HashSet;
+import java.util.Set;
 
 public class RankJudge implements IRank {
 
-	private HashSet<Permission> permissions = new HashSet<>();
+	private Set<Permission> permissions = new HashSet<>();
 
 	public RankJudge() {
 		permissions.add(PermissionRegistry.DefaultPermissions.PERMISSION_PLOT_ADMIN);
@@ -34,7 +34,7 @@ public class RankJudge implements IRank {
 	}
 
 	@Override
-	public Collection<Permission> getPermissions() {
+	public Set<Permission> getPermissions() {
 		return permissions;
 	}
 

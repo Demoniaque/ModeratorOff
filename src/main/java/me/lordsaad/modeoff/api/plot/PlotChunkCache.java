@@ -1,4 +1,4 @@
-package me.lordsaad.modeoff.api;
+package me.lordsaad.modeoff.api.plot;
 
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;

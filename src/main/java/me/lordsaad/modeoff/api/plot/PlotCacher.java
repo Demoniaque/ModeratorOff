@@ -1,7 +1,7 @@
-package me.lordsaad.modeoff.api;
+package me.lordsaad.modeoff.api.plot;
 
 import com.google.common.collect.HashMultimap;
-import me.lordsaad.modeoff.api.plot.Plot;
+import me.lordsaad.modeoff.api.ConfigValues;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.BlockRenderLayer;

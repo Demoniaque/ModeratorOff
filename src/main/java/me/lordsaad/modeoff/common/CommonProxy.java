@@ -34,7 +34,6 @@ public class CommonProxy {
 		ModOffWorldCapability.register();
 
 		ModItems.init();
-		ModSounds.init();
 		CapabilityManager.INSTANCE.register(IModoffCapability.class, new ModoffCapabilityStorage(), DefaultModoffCapability.class);
 
 		MinecraftForge.EVENT_BUS.register(new EventHandler());

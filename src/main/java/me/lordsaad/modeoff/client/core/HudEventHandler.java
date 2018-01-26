@@ -4,6 +4,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent.Post;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
@@ -14,10 +15,23 @@ public class HudEventHandler extends Gui {
 
 	@SubscribeEvent
 	public void renderHud(Post event) {
+		if (event.getType() != RenderGameOverlayEvent.ElementType.EXPERIENCE) return;
+
 		ScaledResolution resolution = event.getResolution();
 		int width = resolution.getScaledWidth();
 		int height = resolution.getScaledHeight();
 		EntityPlayer player = Minecraft.getMinecraft().player;
+
+		//Plot plot = PlotRegistry.INSTANCE.findPlot(player.getPosition());
+		//if (plot != null) {
+		//	GlStateManager.pushMatrix();
+		//	GlStateManager.color(1.0F, 1.0F, 1.0F);
+		//	int right = ((width / 2) - (100 / 2)) + 145;
+		//	int top = height - 17;
+		//	emptyManaBar.draw(ClientTickHandler.getTicks(), right, top);
+		//	emptyBurnoutBar.draw(ClientTickHandler.getTicks(), right, top + 6);
+		//	GlStateManager.popMatrix();
+		//}
 
 		//ItemStack stack = BaublesSupport.getItem(player, ModItems.FAKE_HALO, ModItems.CREATIVE_HALO, ModItems.REAL_HALO);
 		//if (stack == null || stack.isEmpty()) return;

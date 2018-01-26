@@ -1,14 +1,16 @@
 package me.lordsaad.modeoff.common.command;
 
-import me.lordsaad.modeoff.ModeratorOff;
+import com.teamwizardry.librarianlib.features.network.PacketHandler;
 import me.lordsaad.modeoff.api.permissions.PermissionRegistry;
 import me.lordsaad.modeoff.api.plot.Plot;
 import me.lordsaad.modeoff.api.plot.PlotRegistry;
 import me.lordsaad.modeoff.api.rank.RankRegistry;
+import me.lordsaad.modeoff.common.network.PacketOpenGuiPlot;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextFormatting;
@@ -56,12 +58,12 @@ public class CommandPlot extends CommandBase {
 					Plot plot = PlotRegistry.INSTANCE.getPlot(player.getUniqueID());
 					if (plot != null) {
 
-						player.openGui(ModeratorOff.instance, 0, player.getEntityWorld(), 0, 0, 0);
-						//player.playSound(ModSounds.WALLACE_ENTRANCE, 1, 1);
+						PacketHandler.NETWORK.sendTo(new PacketOpenGuiPlot(), (EntityPlayerMP) player);
 
 					} else {
 						sender.sendMessage(new TextComponentString(TextFormatting.RED + "Plot does not exist. " + TextFormatting.GRAY + "You do not have a registered plot."));
 					}
+					return;
 				}
 
 				case "add": {

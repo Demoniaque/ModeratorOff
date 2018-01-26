@@ -6,6 +6,8 @@ import me.lordsaad.modeoff.ModeratorOff;
 import me.lordsaad.modeoff.api.capability.DefaultModoffCapability;
 import me.lordsaad.modeoff.api.capability.IModoffCapability;
 import me.lordsaad.modeoff.api.capability.ModoffCapabilityProvider;
+import me.lordsaad.modeoff.api.permissions.Permission;
+import me.lordsaad.modeoff.api.permissions.PermissionRegistry;
 import me.lordsaad.modeoff.api.rank.defaultranks.RankAdmin;
 import me.lordsaad.modeoff.api.rank.defaultranks.RankJudge;
 import me.lordsaad.modeoff.api.rank.defaultranks.RankNormal;
@@ -18,6 +20,8 @@ import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 import javax.annotation.Nullable;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.UUID;
 
 /**
@@ -38,12 +42,12 @@ public class RankRegistry {
 	}
 
 	public boolean isAdmin(EntityPlayer player) {
-		return getPermission(player) == EnumPerm.ADMIN;
+		return getPermission(player).contains(PermissionRegistry.DefaultPermissions.PERMISSION_PLOT_ADMIN);
 	}
 
-	public EnumPerm getPermission(EntityPlayer player) {
+	public Collection<Permission> getPermission(EntityPlayer player) {
 		IModoffCapability cap = ModoffCapabilityProvider.getCap(player);
-		return cap == null ? EnumPerm.NONE : cap.getRank().getPermission();
+		return cap == null ? Collections.emptySet() : cap.getRank().getPermissions();
 	}
 
 	@Nullable

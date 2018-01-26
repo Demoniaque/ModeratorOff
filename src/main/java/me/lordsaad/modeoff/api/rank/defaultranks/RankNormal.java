@@ -1,10 +1,18 @@
 package me.lordsaad.modeoff.api.rank.defaultranks;
 
-import me.lordsaad.modeoff.api.rank.EnumPerm;
+import me.lordsaad.modeoff.api.permissions.Permission;
 import me.lordsaad.modeoff.api.rank.IRank;
 import net.minecraft.util.text.TextFormatting;
 
+import java.util.Collection;
+import java.util.HashSet;
+
 public class RankNormal implements IRank {
+
+	private HashSet<Permission> permissions = new HashSet<>();
+
+	public RankNormal() {
+	}
 
 	@Override
 	public String getName() {
@@ -17,12 +25,22 @@ public class RankNormal implements IRank {
 	}
 
 	@Override
-	public EnumPerm getPermission() {
-		return EnumPerm.NONE;
+	public boolean displaySeparately() {
+		return false;
 	}
 
 	@Override
-	public boolean displaySeparately() {
-		return false;
+	public Collection<Permission> getPermissions() {
+		return permissions;
+	}
+
+	@Override
+	public void addPermission(Permission permission) {
+
+	}
+
+	@Override
+	public void removePermission(Permission permission) {
+
 	}
 }

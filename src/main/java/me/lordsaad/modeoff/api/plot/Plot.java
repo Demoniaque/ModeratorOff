@@ -3,6 +3,9 @@ package me.lordsaad.modeoff.api.plot;
 import com.teamwizardry.librarianlib.features.math.Vec2d;
 import me.lordsaad.modeoff.api.ConfigValues;
 import me.lordsaad.modeoff.api.Utils;
+import me.lordsaad.modeoff.api.permissions.IPermissionHolder;
+import me.lordsaad.modeoff.api.permissions.Permission;
+import me.lordsaad.modeoff.api.permissions.PermissionRegistry;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
@@ -16,24 +19,23 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.UUID;
 
-public class Plot implements INBTSerializable<NBTTagCompound> {
+public class Plot implements INBTSerializable<NBTTagCompound>, IPermissionHolder {
 
 	private int id;
 	private HashSet<UUID> owners;
 	private PlotDimensions dimensions;
-	private HashSet<String> tags;
+
+	private HashSet<Permission> permissions = new HashSet<>();
 
 	public Plot(int id, @NotNull HashSet<UUID> owners) {
 		this.id = id;
 		this.owners = owners;
 
 		dimensions = new PlotDimensions(id);
-		tags = new HashSet<>();
 	}
 
 	public Plot() {
 		owners = new HashSet<>();
-		tags = new HashSet<>();
 	}
 
 	public void teleportToPlot(EntityPlayer player) {
@@ -70,18 +72,19 @@ public class Plot implements INBTSerializable<NBTTagCompound> {
 		return dimensions;
 	}
 
-	public void addTag(String tag) {
-		tags.add(tag);
-		PlotRegistry.INSTANCE.savePlot(getID());
+	@Override
+	public Collection<Permission> getPermissions() {
+		return permissions;
 	}
 
-	public void removeTag(String tag) {
-		tags.remove(tag);
-		PlotRegistry.INSTANCE.savePlot(getID());
+	@Override
+	public void addPermission(Permission permission) {
+		getPermissions().add(permission);
 	}
 
-	public boolean hasTag(String tag) {
-		return tags.contains(tag);
+	@Override
+	public void removePermission(Permission permission) {
+		permissions.remove(permission);
 	}
 
 	@Override
@@ -95,11 +98,11 @@ public class Plot implements INBTSerializable<NBTTagCompound> {
 		}
 		compound.setTag("owners", owners);
 
-		NBTTagList tags = new NBTTagList();
-		for (String tag : this.tags) {
-			tags.appendTag(new NBTTagString(tag));
+		NBTTagList perms = new NBTTagList();
+		for (Permission permission : this.permissions) {
+			perms.appendTag(permission.serializeNBT());
 		}
-		compound.setTag("tags", tags);
+		compound.setTag("permissions", perms);
 
 		return compound;
 	}
@@ -118,21 +121,22 @@ public class Plot implements INBTSerializable<NBTTagCompound> {
 			}
 		}
 
-		if (nbt.hasKey("tags")) {
+		if (nbt.hasKey("permissions")) {
+			permissions = new HashSet<>();
 
-			NBTTagList list = nbt.getTagList("tags", Constants.NBT.TAG_STRING);
+			NBTTagList list = nbt.getTagList("permissions", Constants.NBT.TAG_STRING);
 
 			for (int i = 0; i < list.tagCount(); i++) {
 				String tag = list.getStringTagAt(i);
-				tags.add(tag);
+				permissions.add(PermissionRegistry.INSTANCE.getPermission(tag));
 			}
 		}
 
 		dimensions = new PlotDimensions(getID());
 	}
 
-	public HashSet<String> getTags() {
-		return tags;
+	public void save() {
+		PlotRegistry.INSTANCE.savePlot(getID());
 	}
 
 	public class PlotDimensions {

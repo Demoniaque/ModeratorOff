@@ -1,5 +1,7 @@
 package me.lordsaad.modeoff.common.command;
 
+import me.lordsaad.modeoff.ModeratorOff;
+import me.lordsaad.modeoff.api.permissions.PermissionRegistry;
 import me.lordsaad.modeoff.api.plot.Plot;
 import me.lordsaad.modeoff.api.plot.PlotRegistry;
 import me.lordsaad.modeoff.api.rank.RankRegistry;
@@ -13,6 +15,7 @@ import net.minecraft.util.text.TextFormatting;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.UUID;
 
 /**
@@ -42,20 +45,46 @@ public class CommandPlot extends CommandBase {
 
 			switch (firstArg) {
 
+				case "edit":
+				case "manage": {
+					if (!Objects.requireNonNull(RankRegistry.INSTANCE.getRank(getCommandSenderAsPlayer(sender))).hasPermission(PermissionRegistry.DefaultPermissions.PERMISSION_PLOT_REGISTER)) {
+						sender.sendMessage(new TextComponentString(TextFormatting.RED + "Insufficient Permissions. " + TextFormatting.GRAY + "You can't register a plot to edit or manage."));
+						return;
+					}
+
+					EntityPlayer player = getCommandSenderAsPlayer(sender);
+					Plot plot = PlotRegistry.INSTANCE.getPlot(player.getUniqueID());
+					if (plot != null) {
+
+						player.openGui(ModeratorOff.instance, 0, player.getEntityWorld(), 0, 0, 0);
+						//player.playSound(ModSounds.WALLACE_ENTRANCE, 1, 1);
+
+					} else {
+						sender.sendMessage(new TextComponentString(TextFormatting.RED + "Plot does not exist. " + TextFormatting.GRAY + "You do not have a registered plot."));
+					}
+				}
+
 				case "add": {
+
+					if (!Objects.requireNonNull(RankRegistry.INSTANCE.getRank(getCommandSenderAsPlayer(sender))).hasPermission(PermissionRegistry.DefaultPermissions.PERMISSION_PLOT_REGISTER)) {
+						sender.sendMessage(new TextComponentString(TextFormatting.RED + "Insufficient Permissions. " + TextFormatting.GRAY + "You can't register a plot to add someone to."));
+						return;
+					}
+
 					if (args.length <= 1) {
-						sender.sendMessage(new TextComponentString(TextFormatting.RED + "Incorrect command usage. You didn't specify which player you would like to add to the plot."));
+						sender.sendMessage(new TextComponentString(TextFormatting.RED + "Incorrect command usage. " + TextFormatting.GRAY + "You didn't specify which player you would like to add to the plot."));
 						sender.sendMessage(new TextComponentString(TextFormatting.GRAY + getUsage(sender)));
 						return;
 					}
+
 					EntityPlayer player = getPlayer(server, sender, args[1]);
 					Plot plot = PlotRegistry.INSTANCE.getPlot(getCommandSenderAsPlayer(sender).getUniqueID());
 					if (plot != null) {
 						plot.getOwners().add(player.getUniqueID());
-						sender.sendMessage(new TextComponentString(TextFormatting.GREEN + "Successfully added '" + TextFormatting.GOLD + player.getName() + TextFormatting.GREEN + "' to the plot."));
-						player.sendMessage(new TextComponentString(TextFormatting.GREEN + "You have been successfully added to " + TextFormatting.GOLD + sender.getName() + TextFormatting.GREEN + "'s plot."));
+						sender.sendMessage(new TextComponentString(TextFormatting.GREEN + "Successfully added [" + TextFormatting.GOLD + player.getName() + TextFormatting.GREEN + "] to the plot."));
+						player.sendMessage(new TextComponentString(TextFormatting.GREEN + "You have been successfully added to [" + TextFormatting.GOLD + sender.getName() + TextFormatting.GREEN + "]'s plot."));
 					} else {
-						sender.sendMessage(new TextComponentString(TextFormatting.RED + "You do not have a registered plot."));
+						sender.sendMessage(new TextComponentString(TextFormatting.RED + "Plot does not exist. " + TextFormatting.GRAY + "You do not have a registered plot."));
 					}
 
 					return;
@@ -64,23 +93,35 @@ public class CommandPlot extends CommandBase {
 				case "teleport":
 				case "tp": {
 					EntityPlayer player;
-					if (args.length == 1)
+					if (args.length == 1) {
+						if (!Objects.requireNonNull(RankRegistry.INSTANCE.getRank(getCommandSenderAsPlayer(sender))).hasPermission(PermissionRegistry.DefaultPermissions.PERMISSION_PLOT_REGISTER)) {
+							sender.sendMessage(new TextComponentString(TextFormatting.RED + "Insufficient Permissions. " + TextFormatting.GRAY + "You can't own a plot to teleport to. Specify a username to teleport to their plot instead."));
+							return;
+						}
 						player = getCommandSenderAsPlayer(sender);
-					else player = getPlayer(server, sender, args[1]);
+					} else player = getPlayer(server, sender, args[1]);
 
 					Plot plot = PlotRegistry.INSTANCE.getPlot(player.getUniqueID());
 					if (plot != null) {
 						plot.teleportToPlot(getCommandSenderAsPlayer(sender));
 
-						sender.sendMessage(new TextComponentString(TextFormatting.GREEN + "Teleported to plot successfully."));
+						sender.sendMessage(new TextComponentString(TextFormatting.GREEN + "Teleported to [" + TextFormatting.GOLD + player.getName() + "]'s plot successfully."));
 
 					} else
-						sender.sendMessage(new TextComponentString(TextFormatting.RED + "You do not have a registered plot."));
+						sender.sendMessage(new TextComponentString(TextFormatting.RED + "Plot does not exist. "
+								+ (player.getName().equalsIgnoreCase(sender.getName()) ?
+								TextFormatting.GRAY + "You don't have a registered plot." :
+								TextFormatting.GRAY + "[" + TextFormatting.GOLD + player.getName() + TextFormatting.GRAY + "] does not have a registered plot.")));
 
 					return;
 				}
 
 				case "register": {
+
+					if (!Objects.requireNonNull(RankRegistry.INSTANCE.getRank(getCommandSenderAsPlayer(sender))).hasPermission(PermissionRegistry.DefaultPermissions.PERMISSION_PLOT_REGISTER)) {
+						sender.sendMessage(new TextComponentString(TextFormatting.RED + "Insufficient Permissions. " + TextFormatting.GRAY + "You can't register a plot for someone else."));
+						return;
+					}
 
 					EntityPlayer player;
 					if (args.length == 1)
@@ -88,12 +129,12 @@ public class CommandPlot extends CommandBase {
 					else if (!(sender instanceof EntityPlayer) || RankRegistry.INSTANCE.isAdmin((EntityPlayer) sender))
 						player = getPlayer(server, sender, args[1]);
 					else {
-						sender.sendMessage(new TextComponentString(TextFormatting.RED + "Insufficient Permissions. You can't register a plot for someone else."));
+						sender.sendMessage(new TextComponentString(TextFormatting.RED + "Insufficient Permissions. " + TextFormatting.GRAY + "You can't register a plot for someone else."));
 						return;
 					}
 
 					if (PlotRegistry.INSTANCE.isUUIDRegistered(player.getUniqueID())) {
-						sender.sendMessage(new TextComponentString(TextFormatting.RED + "You already have a plot. Do /plot tp to teleport to it."));
+						sender.sendMessage(new TextComponentString(TextFormatting.RED + "You already have a plot. " + TextFormatting.GRAY + "Do /plot tp to teleport to it."));
 						return;
 					}
 
@@ -103,9 +144,9 @@ public class CommandPlot extends CommandBase {
 					Plot plot = PlotRegistry.INSTANCE.registerPlot(new Plot(PlotRegistry.INSTANCE.getNextAvailableID(), owners));
 					plot.teleportToPlot(player);
 
-					player.sendMessage(new TextComponentString(TextFormatting.GREEN + "Your plot has been registered successfully! " + TextFormatting.GRAY + " Plot ID: [" + plot.getID() + "]"));
+					player.sendMessage(new TextComponentString(TextFormatting.GREEN + "Your plot has been registered successfully! " + TextFormatting.GRAY + " Plot ID: [" + TextFormatting.GREEN + plot.getID() + TextFormatting.GRAY + "]"));
 					if (!sender.getName().equals(player.getName()))
-						sender.sendMessage(new TextComponentString(TextFormatting.GREEN + "Plot for '" + TextFormatting.GOLD + player.getName() + TextFormatting.GREEN + "' has been registered successfully! " + TextFormatting.GRAY + " Plot ID: [" + plot.getID() + "]"));
+						sender.sendMessage(new TextComponentString(TextFormatting.GREEN + "Plot for '" + TextFormatting.GOLD + player.getName() + TextFormatting.GREEN + "' has been registered successfully! " + TextFormatting.GRAY + " Plot ID: [" + TextFormatting.GREEN + plot.getID() + TextFormatting.GRAY + "]"));
 
 					return;
 				}

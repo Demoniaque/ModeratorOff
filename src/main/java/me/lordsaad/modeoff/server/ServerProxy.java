@@ -1,5 +1,7 @@
 package me.lordsaad.modeoff.server;
 
+import com.google.common.base.Charsets;
+import com.google.common.io.Resources;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -14,9 +16,8 @@ import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.InputStreamReader;
+import java.io.IOException;
 import java.net.URL;
 import java.util.UUID;
 
@@ -70,53 +71,49 @@ public class ServerProxy extends CommonProxy {
 
 				ModeratorOff.logger.info("> Fetching '" + name + "' players");
 
-				URL url = new URL("https://raw.githubusercontent.com/Demoniaque/ModeratorOff/master/ranks/" + name + ".txt");
-				BufferedReader r = new BufferedReader(new InputStreamReader(url.openStream()));
+				Resources.asCharSource(new URL("https://raw.githubusercontent.com/Demoniaque/ModeratorOff/master/ranks/" + name + ".txt"), Charsets.UTF_8)
+						.readLines()
+						.forEach(line -> {
 
-				String line;
-				while ((line = r.readLine()) != null) {
+							ModeratorOff.logger.info("    > Looking up '" + line + "'");
 
-					ModeratorOff.logger.info("    > Looking up '" + line + "'");
+							// GET PLAYER UUID FROM MOJANG
+							StringBuilder jsonString = new StringBuilder();
+							try {
+								Resources.asCharSource(new URL("https://api.mojang.com/users/profiles/minecraft/" + line), Charsets.UTF_8)
+										.readLines()
+										.forEach(jsonString::append);
+							} catch (IOException e) {
+								e.printStackTrace();
+							}
 
-					// GET PLAYER UUID FROM MOJANG
-					URL mojangAPI = new URL("https://api.mojang.com/users/profiles/minecraft/" + line);
-					BufferedReader mojangReader = new BufferedReader(new InputStreamReader(mojangAPI.openStream()));
+							JsonElement element = new JsonParser().parse(jsonString.toString());
+							if (element == null || !element.isJsonObject()) {
+								ModeratorOff.logger.info("      > Could not find uuid for " + line + ".");
+								return;
+							}
 
-					StringBuilder jsonString = new StringBuilder();
-					String jsonLine;
-					while ((jsonLine = mojangReader.readLine()) != null) {
-						jsonString.append(jsonLine);
-					}
+							JsonObject object = element.getAsJsonObject();
 
-					mojangReader.close();
+							if (object.has("id") && object.get("id").isJsonPrimitive()) {
+								String uuid = object.getAsJsonPrimitive("id").getAsJsonPrimitive().getAsString();
 
-					JsonElement element = new JsonParser().parse(jsonString.toString());
-					if (element == null || !element.isJsonObject()) {
-						ModeratorOff.logger.info("      > Could not find uuid for " + line + ".");
-						continue;
-					}
+								// Format uuid
+								uuid = uuid.substring(0, 8) + "-"
+										+ uuid.substring(8, 12) + "-"
+										+ uuid.substring(12, 16) + "-"
+										+ uuid.substring(16, 20) + "-"
+										+ uuid.substring(20);
 
-					JsonObject object = element.getAsJsonObject();
+								RankRegistry.INSTANCE.rankMap.put(rank, UUID.fromString(uuid));
 
-					if (object.has("id") && object.get("id").isJsonPrimitive()) {
-						String uuid = object.getAsJsonPrimitive("id").getAsJsonPrimitive().getAsString();
+								ModeratorOff.logger.info("      > Found uuid for " + line + " -> " + uuid + ". Success!");
+							} else {
+								ModeratorOff.logger.info("      > Could not find uuid for " + line + ".");
+							}
 
-						// Format uuid
-						uuid = uuid.substring(0, 8) + "-"
-								+ uuid.substring(8, 12) + "-"
-								+ uuid.substring(12, 16) + "-"
-								+ uuid.substring(16, 20) + "-"
-								+ uuid.substring(20);
+						});
 
-						RankRegistry.INSTANCE.rankMap.put(rank, UUID.fromString(uuid));
-
-						ModeratorOff.logger.info("      > Found uuid for " + line + " -> " + uuid + ". Success!");
-					} else {
-						ModeratorOff.logger.info("      > Could not find uuid for " + line + ".");
-					}
-
-				}
-				r.close();
 			}
 
 		} catch (Exception e) {

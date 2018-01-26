@@ -13,6 +13,8 @@ import me.lordsaad.modeoff.ModeratorOff;
 import me.lordsaad.modeoff.api.ConfigValues;
 import me.lordsaad.modeoff.api.PlotCacher;
 import me.lordsaad.modeoff.api.PlotChunkCache;
+import me.lordsaad.modeoff.api.permissions.Permission;
+import me.lordsaad.modeoff.api.permissions.PermissionRegistry;
 import me.lordsaad.modeoff.api.plot.Plot;
 import me.lordsaad.modeoff.api.plot.PlotRegistry;
 import me.lordsaad.modeoff.common.network.PacketUpdatePlot;
@@ -65,60 +67,86 @@ public class GuiPlot extends GuiBase {
 
 		int buffer = 20;
 		int id = 0;
-		new ComponentButton(20, 20 + (id * 20) + (id * buffer), compRect, "Lock Plot", plot.hasTag("lock_plot") ? CHECKBOX_CHECKED : CHECKBOX_XED, (componentSprite, componentText) -> {
-			String tag = "lock_plot";
-			if (plot.hasTag(tag)) {
-				plot.removeTag(tag);
-			} else plot.addTag(tag);
+		Permission lockPlotPerm = PermissionRegistry.DefaultPermissions.PERMISSION_LOCK_PLOT;
+		new ComponentButton(20, 20 + (id * 20) + (id * buffer), compRect, "Lock Plot", plot.hasPermission(lockPlotPerm) ? CHECKBOX_CHECKED : CHECKBOX_XED, (componentSprite, componentText) -> {
+			boolean hasPerm = plot.hasPermission(lockPlotPerm);
 
-			if (plot.hasTag(tag)) {
+			if (hasPerm) {
+				plot.removePermission(lockPlotPerm);
+				componentSprite.setSprite(CHECKBOX_XED);
+			} else {
+				plot.addPermission(lockPlotPerm);
 				componentSprite.setSprite(CHECKBOX_CHECKED);
-			} else componentSprite.setSprite(CHECKBOX_XED);
+			}
 
 			PacketHandler.NETWORK.sendToServer(new PacketUpdatePlot(plot));
-			Minecraft.getMinecraft().player.playSound(SoundEvents.BLOCK_NOTE_BELL, 1, plot.hasTag(tag) ? 2f : 1f);
+			Minecraft.getMinecraft().player.playSound(SoundEvents.BLOCK_NOTE_BELL, 1, hasPerm ? 2f : 1f);
+
 		}).render.getTooltip().func((Function<GuiComponent, java.util.List<String>>) t -> {
 			List<String> txt = new ArrayList<>();
 			txt.add("If a plot is locked, no one including the plot owners (yourself) will be able to edit the plot.");
 			return txt;
 		});
 
-		new ComponentButton(20, 20 + (++id * 20) + (id * buffer), compRect, "Disable Block Placing", plot.hasTag("edit_plot_place") ? CHECKBOX_CHECKED : CHECKBOX_XED, (componentSprite, componentText) -> {
-			String tag = "edit_plot_place";
-			if (plot.hasTag(tag)) {
-				plot.removeTag(tag);
-			} else plot.addTag(tag);
+		Permission blockPlacingPerm = PermissionRegistry.DefaultPermissions.PERMISSION_DISABLE_BLOCK_PLACING;
+		new ComponentButton(20, 20 + (++id * 20) + (id * buffer), compRect, "Disable Block Placing", plot.hasPermission(blockPlacingPerm) ? CHECKBOX_CHECKED : CHECKBOX_XED, (componentSprite, componentText) -> {
+			boolean hasPerm = plot.hasPermission(blockPlacingPerm);
 
-			if (plot.hasTag(tag)) {
+			if (hasPerm) {
+				plot.removePermission(blockPlacingPerm);
+				componentSprite.setSprite(CHECKBOX_XED);
+			} else {
+				plot.addPermission(blockPlacingPerm);
 				componentSprite.setSprite(CHECKBOX_CHECKED);
-			} else componentSprite.setSprite(CHECKBOX_XED);
+			}
 
 			PacketHandler.NETWORK.sendToServer(new PacketUpdatePlot(plot));
-			Minecraft.getMinecraft().player.playSound(SoundEvents.BLOCK_NOTE_BELL, 1, plot.hasTag(tag) ? 2f : 1f);
+			Minecraft.getMinecraft().player.playSound(SoundEvents.BLOCK_NOTE_BELL, 1, hasPerm ? 2f : 1f);
 		}).render.getTooltip().func((Function<GuiComponent, java.util.List<String>>) t -> {
 			List<String> txt = new ArrayList<>();
 			txt.add("If enabled, viewers of the plot (your audience) will be able to place cacher.blocks on the plot");
 			return txt;
 		});
 
-		new ComponentButton(20, 20 + (++id * 20) + (id * buffer), compRect, "Disable Block Breaking", plot.hasTag("edit_plot_break") ? CHECKBOX_CHECKED : CHECKBOX_XED, (componentSprite, componentText) -> {
-			String tag = "edit_plot_break";
-			if (plot.hasTag(tag)) {
-				plot.removeTag(tag);
-			} else plot.addTag(tag);
+		Permission blockBreakingPerm = PermissionRegistry.DefaultPermissions.PERMISSION_DISABLE_BLOCK_BREAKING;
+		new ComponentButton(20, 20 + (++id * 20) + (id * buffer), compRect, "Disable Block Breaking", plot.hasPermission(blockBreakingPerm) ? CHECKBOX_CHECKED : CHECKBOX_XED, (componentSprite, componentText) -> {
+			boolean hasPerm = plot.hasPermission(blockBreakingPerm);
 
-			if (plot.hasTag(tag)) {
+			if (hasPerm) {
+				plot.removePermission(blockBreakingPerm);
+				componentSprite.setSprite(CHECKBOX_XED);
+			} else {
+				plot.addPermission(blockBreakingPerm);
 				componentSprite.setSprite(CHECKBOX_CHECKED);
-			} else componentSprite.setSprite(CHECKBOX_XED);
+			}
 
 			PacketHandler.NETWORK.sendToServer(new PacketUpdatePlot(plot));
-			Minecraft.getMinecraft().player.playSound(SoundEvents.BLOCK_NOTE_BELL, 1, plot.hasTag(tag) ? 2f : 1f);
+			Minecraft.getMinecraft().player.playSound(SoundEvents.BLOCK_NOTE_BELL, 1, hasPerm ? 2f : 1f);
 		}).render.getTooltip().func((Function<GuiComponent, java.util.List<String>>) t -> {
 			List<String> txt = new ArrayList<>();
-			txt.add("If enabled, viewers of the plot (your audience) will be able to break cacher.blocks on the plot");
+			txt.add("If enabled, viewers of the plot (your audience) will be able to break blocks on the plot");
 			return txt;
 		});
 
+		Permission leftClickingPerm = PermissionRegistry.DefaultPermissions.PERMISSION_DISABLE_BLOCK_LEFT_CLICKING;
+		new ComponentButton(20, 20 + (++id * 20) + (id * buffer), compRect, "Disable Block Left Clicking", plot.hasPermission(leftClickingPerm) ? CHECKBOX_CHECKED : CHECKBOX_XED, (componentSprite, componentText) -> {
+			boolean hasPerm = plot.hasPermission(leftClickingPerm);
+
+			if (hasPerm) {
+				plot.removePermission(leftClickingPerm);
+				componentSprite.setSprite(CHECKBOX_XED);
+			} else {
+				plot.addPermission(leftClickingPerm);
+				componentSprite.setSprite(CHECKBOX_CHECKED);
+			}
+
+			PacketHandler.NETWORK.sendToServer(new PacketUpdatePlot(plot));
+			Minecraft.getMinecraft().player.playSound(SoundEvents.BLOCK_NOTE_BELL, 1, hasPerm ? 2f : 1f);
+		}).render.getTooltip().func((Function<GuiComponent, java.util.List<String>>) t -> {
+			List<String> txt = new ArrayList<>();
+			txt.add("If enabled, the left click block event will be cancelled to the viewers (your audience)");
+			return txt;
+		});
 
 		//if (false) {
 		Plot.PlotDimensions dimensions = plot.getDimensions();

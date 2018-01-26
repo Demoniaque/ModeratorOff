@@ -1,10 +1,23 @@
 package me.lordsaad.modeoff.api.plot;
 
-import com.google.gson.*;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.google.gson.internal.Streams;
+import com.google.gson.stream.JsonWriter;
 import me.lordsaad.modeoff.ModeratorOff;
+import me.lordsaad.modeoff.api.Utils;
+import me.lordsaad.modeoff.api.permissions.Permission;
+import me.lordsaad.modeoff.api.permissions.PermissionRegistry;
+import net.minecraft.util.math.BlockPos;
 
 import javax.annotation.Nullable;
-import java.io.*;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.UUID;
@@ -51,6 +64,16 @@ public class PlotRegistry {
 		return null;
 	}
 
+	@Nullable
+	public Plot findPlot(BlockPos pos) {
+		for (Plot plot : plots) {
+			Plot.PlotDimensions dimensions = plot.getDimensions();
+			if (Utils.isWithinBounds(dimensions.getCorner1(), dimensions.getCorner2(), pos))
+				return plot;
+		}
+		return null;
+	}
+
 	public boolean isUUIDRegistered(UUID uuid) {
 		for (Plot plot : plots) {
 			for (UUID owner : plot.getOwners()) {
@@ -82,28 +105,16 @@ public class PlotRegistry {
 		}
 		object.add("owners", owners);
 
-		JsonArray tags = new JsonArray();
-		for (String tag : plot.getTags()) {
-			tags.add(tag);
+		JsonArray perms = new JsonArray();
+		for (Permission permission : plot.getPermissions()) {
+			perms.add(permission.getTagID());
 		}
-		object.add("tags", tags);
+		object.add("permissions", perms);
 
-		File file = new File(directory, "plot_" + plot.getID() + ".json");
-
-		if (!file.exists()) {
-			try {
-				file.createNewFile();
-			} catch (IOException ignored) {
-			}
-		}
-
-		try {
-			FileWriter writer = new FileWriter(file);
-			new Gson().toJson(object, writer);
-			writer.flush();
-			ModeratorOff.logger.info("    > Saved plot id `" + plot.getID() + "` to file `" + file.getName() + "`");
+		try (JsonWriter writer = new JsonWriter(Files.newBufferedWriter(directory.toPath().resolve("plot_" + plot.getID() + ".json")))) {
+			Streams.write(object, writer);
 		} catch (IOException e) {
-			e.printStackTrace();
+			ModeratorOff.logger.error("Error saving plot", e);
 		}
 	}
 
@@ -164,7 +175,11 @@ public class PlotRegistry {
 						JsonArray tagsArray = object.getAsJsonArray("tags");
 						for (JsonElement tagElement : tagsArray) {
 							if (!tagElement.isJsonPrimitive()) {
-								plot.addTag(tagElement.getAsString());
+
+								Permission permission = PermissionRegistry.INSTANCE.getPermission(tagElement.getAsString());
+
+								if (permission != null) plot.addPermission(permission);
+								else ModeratorOff.logger.info("Invalid permission -> " + tagElement.getAsString());
 							}
 						}
 					}

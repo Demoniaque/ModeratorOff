@@ -18,10 +18,7 @@ import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextFormatting;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.HashSet;
-import java.util.Locale;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Created by LordSaad.
@@ -113,37 +110,6 @@ public class CommandPlot extends CommandBase {
 					return;
 				}
 
-				case "add": {
-
-					if (!RankRegistry.INSTANCE.getRank(getCommandSenderAsPlayer(sender)).hasPermission(PermissionRegistry.DefaultPermissions.PERMISSION_PLOT_REGISTER)) {
-						sender.sendMessage(new TextComponentString(TextFormatting.RED + "Insufficient Permissions. " + TextFormatting.GRAY + "You can't register a plot to add someone to."));
-						return;
-					}
-
-					if (args.length <= 1) {
-						sender.sendMessage(new TextComponentString(TextFormatting.RED + "Incorrect command usage. " + TextFormatting.GRAY + "You didn't specify which player you would like to add to the plot."));
-						sender.sendMessage(new TextComponentString(TextFormatting.GRAY + getUsage(sender)));
-						return;
-					}
-
-					if (!CommonProxy.playerUUIDMap.containsKey(args[1])) {
-						sender.sendMessage(new TextComponentString(TextFormatting.RED + "Player specified is not a registered contestant."));
-						return;
-					}
-
-					EntityPlayer player = getPlayer(server, sender, args[1]);
-					Plot plot = PlotRegistry.INSTANCE.getPlot(getCommandSenderAsPlayer(sender).getUniqueID());
-					if (plot != null) {
-						plot.getOwners().add(player.getUniqueID());
-						sender.sendMessage(new TextComponentString(TextFormatting.GREEN + "Successfully added [" + TextFormatting.GOLD + player.getName() + TextFormatting.GREEN + "] to the plot."));
-						player.sendMessage(new TextComponentString(TextFormatting.GREEN + "You have been successfully added to [" + TextFormatting.GOLD + sender.getName() + TextFormatting.GREEN + "]'s plot."));
-					} else {
-						sender.sendMessage(new TextComponentString(TextFormatting.RED + "Plot does not exist. " + TextFormatting.GRAY + "You do not have a registered plot."));
-					}
-
-					return;
-				}
-
 				case "tp": {
 					EntityPlayer player;
 					if (args.length == 1) {
@@ -207,6 +173,23 @@ public class CommandPlot extends CommandBase {
 						plot.teleport(player);
 
 						player.sendMessage(new TextComponentString(TextFormatting.GREEN + "Your plot has been registered successfully! " + TextFormatting.GRAY + " Plot ID: [" + TextFormatting.GREEN + plot.getID() + TextFormatting.GRAY + "]"));
+
+						if (owners.size() > 1) {
+
+							List<UUID> ownerList = new ArrayList<>(owners);
+							StringBuilder builder = new StringBuilder();
+							for (int i = 0; i < ownerList.size(); i++) {
+								UUID uuid = ownerList.get(i);
+								String playerName = CommonProxy.playerUUIDMap.inverse().get(uuid);
+
+								builder.append(playerName);
+
+								if (i < ownerList.size()) builder.append(", ");
+							}
+
+							player.sendMessage(new TextComponentString(TextFormatting.GREEN + "Team Members Included: " + builder.toString()));
+						}
+
 						if (!sender.getName().equals(player.getName()))
 							sender.sendMessage(new TextComponentString(TextFormatting.GREEN + "Plot for '" + TextFormatting.GOLD + player.getName() + TextFormatting.GREEN + "' has been registered successfully! " + TextFormatting.GRAY + " Plot ID: [" + TextFormatting.GREEN + plot.getID() + TextFormatting.GRAY + "]"));
 					}

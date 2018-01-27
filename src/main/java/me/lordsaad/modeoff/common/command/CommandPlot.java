@@ -18,7 +18,10 @@ import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextFormatting;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.HashSet;
 import java.util.Locale;
+import java.util.Set;
+import java.util.UUID;
 
 /**
  * Created by LordSaad.
@@ -185,7 +188,22 @@ public class CommandPlot extends CommandBase {
 							return;
 						}
 
-						Plot plot = PlotRegistry.INSTANCE.registerPlot(new Plot(modName, player.getUniqueID()));
+						Set<UUID> owners = new HashSet<>();
+						for (Set<UUID> team : CommonProxy.teams) {
+							for (UUID uuid : team) {
+								if (uuid.equals(player.getUniqueID())) {
+									owners = team;
+									break;
+								}
+							}
+						}
+
+						if (owners.isEmpty()) {
+							owners.add(player.getUniqueID());
+						}
+
+						Plot plot = PlotRegistry.INSTANCE.registerPlot(new Plot(modName, owners));
+
 						plot.teleport(player);
 
 						player.sendMessage(new TextComponentString(TextFormatting.GREEN + "Your plot has been registered successfully! " + TextFormatting.GRAY + " Plot ID: [" + TextFormatting.GREEN + plot.getID() + TextFormatting.GRAY + "]"));

@@ -2,6 +2,7 @@ package me.lordsaad.modeoff.server;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -19,6 +20,8 @@ import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -71,55 +74,93 @@ public class ServerProxy extends CommonProxy {
 
 				ModeratorOff.logger.info("> Fetching '" + name + "' players");
 
-				Resources.asCharSource(new URL("https://raw.githubusercontent.com/Demoniaque/ModeratorOff/master/ranks/" + name + ".txt"), Charsets.UTF_8)
-						.readLines()
-						.forEach(line -> {
+				String rankJson = Resources.asCharSource(new URL("https://raw.githubusercontent.com/Demoniaque/ModeratorOff/master/ranks/" + name + ".json"), Charsets.UTF_8).read();
 
-							ModeratorOff.logger.info("    > Looking up '" + line + "'");
+				JsonElement jsonElement = new JsonParser().parse(rankJson);
+				if (jsonElement == null || !jsonElement.isJsonArray()) {
+					ModeratorOff.logger.info("  > Error reading json " + name);
+					return;
+				}
 
-							// GET PLAYER UUID FROM MOJANG
-							StringBuilder jsonString = new StringBuilder();
-							try {
-								Resources.asCharSource(new URL("https://api.mojang.com/users/profiles/minecraft/" + line), Charsets.UTF_8)
-										.readLines()
-										.forEach(jsonString::append);
-							} catch (IOException e) {
-								e.printStackTrace();
+				JsonArray array = jsonElement.getAsJsonArray();
+
+				for (JsonElement element : array) {
+					if (element.isJsonPrimitive()) {
+						String playerName = element.getAsJsonPrimitive().getAsString();
+
+						ModeratorOff.logger.info("  > Looking up uuid for '" + playerName + "'");
+
+						UUID uuid = lookupPlayerUUID(playerName);
+						if (uuid == null) {
+							ModeratorOff.logger.info("    > Failed to find uuid for '" + playerName + "'");
+						} else {
+							ModeratorOff.logger.info("    > Found uuid for '" + playerName + "' -> " + uuid.toString());
+						}
+
+						RankRegistry.INSTANCE.rankMap.put(rank, uuid);
+						CommonProxy.playerUUIDMap.put(playerName, uuid);
+					} else if (element.isJsonArray()) {
+
+						JsonArray team = element.getAsJsonArray();
+						Set<UUID> teamSet = new HashSet<>();
+
+						for (JsonElement teamElement : team) {
+							if (teamElement.isJsonPrimitive()) {
+								String playerName = teamElement.getAsJsonPrimitive().getAsString();
+
+								ModeratorOff.logger.info("  > Looking up uuid for '" + playerName + "'");
+
+								UUID uuid = lookupPlayerUUID(playerName);
+								if (uuid == null) {
+									ModeratorOff.logger.info("    > Failed to find uuid for '" + playerName + "'");
+								} else {
+									ModeratorOff.logger.info("    > Found uuid for '" + playerName + "' -> " + uuid.toString());
+								}
+
+								RankRegistry.INSTANCE.rankMap.put(rank, uuid);
+								CommonProxy.playerUUIDMap.put(playerName, uuid);
+
+								teamSet.add(uuid);
 							}
+						}
 
-							JsonElement element = new JsonParser().parse(jsonString.toString());
-							if (element == null || !element.isJsonObject()) {
-								ModeratorOff.logger.info("      > Could not find uuid for " + line + ".");
-								return;
-							}
-
-							JsonObject object = element.getAsJsonObject();
-
-							if (object.has("id") && object.get("id").isJsonPrimitive()) {
-								String uuid = object.getAsJsonPrimitive("id").getAsJsonPrimitive().getAsString();
-
-								// Format uuid
-								uuid = uuid.substring(0, 8) + "-"
-										+ uuid.substring(8, 12) + "-"
-										+ uuid.substring(12, 16) + "-"
-										+ uuid.substring(16, 20) + "-"
-										+ uuid.substring(20);
-
-								RankRegistry.INSTANCE.rankMap.put(rank, UUID.fromString(uuid));
-								CommonProxy.playerUUIDMap.put(line, UUID.fromString(uuid));
-
-								ModeratorOff.logger.info("      > Found uuid for " + line + " -> " + uuid + ". Success!");
-							} else {
-								ModeratorOff.logger.info("      > Could not find uuid for " + line + ".");
-							}
-
-						});
-
+						CommonProxy.teams.add(teamSet);
+					}
+				}
 			}
-
-		} catch (Exception e) {
-			e.printStackTrace();
+		} catch (IOException e1) {
+			e1.printStackTrace();
 		}
 		ModeratorOff.logger.info("<<========================================================================>>");
+	}
+
+	public static UUID lookupPlayerUUID(String playerName) {
+		try {
+			String mojangJson = Resources.asCharSource(new URL("https://api.mojang.com/users/profiles/minecraft/" + playerName), Charsets.UTF_8).read();
+
+			JsonElement element = new JsonParser().parse(mojangJson);
+			if (element == null || !element.isJsonObject()) {
+				return null;
+			}
+
+			JsonObject object = element.getAsJsonObject();
+
+			if (object.has("id") && object.get("id").isJsonPrimitive()) {
+				String uuid = object.getAsJsonPrimitive("id").getAsJsonPrimitive().getAsString();
+
+				// Format uuid
+				uuid = uuid.substring(0, 8) + "-"
+						+ uuid.substring(8, 12) + "-"
+						+ uuid.substring(12, 16) + "-"
+						+ uuid.substring(16, 20) + "-"
+						+ uuid.substring(20);
+
+				return UUID.fromString(uuid);
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		return null;
 	}
 }

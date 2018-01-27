@@ -16,6 +16,8 @@ import net.minecraftforge.fml.common.network.NetworkRegistry;
 
 import javax.annotation.Nullable;
 import java.io.File;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 import static me.lordsaad.modeoff.server.ServerProxy.fetchRanks;
@@ -29,6 +31,7 @@ public class CommonProxy {
 	public static File directory = null;
 
 	public static HashBiMap<String, UUID> playerUUIDMap = HashBiMap.create();
+	public static Set<Set<UUID>> teams = new HashSet<>();
 
 	public void preInit(FMLPreInitializationEvent event) {
 		ModItems.init();

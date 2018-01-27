@@ -26,9 +26,9 @@ public class PlotCacher {
 	private HashMap<Long, IBlockState> tmp = new HashMap<>();
 
 	public PlotCacher(IBlockAccess world, Plot plot) {
-		Plot.PlotDimensions dimensions = plot.getDimensions();
+		PlotDimensions dimensions = plot.getDimensions();
 
-		for (BlockPos pos : plot.getDimensions().getAllBlocks()) {
+		for (BlockPos pos : plot.getDimensions().getAllBlocks(3)) {
 			IBlockState state = world.getBlockState(pos);
 
 			if (state.getBlock() == Blocks.AIR) continue;
@@ -58,14 +58,13 @@ public class PlotCacher {
 					break;
 				}
 
-				if (!offsetState.isFullBlock()
+				if (offsetState.getBlock() == Blocks.AIR
+						|| !offsetState.isFullBlock()
 						|| !offsetState.isOpaqueCube()
 						|| !offsetState.isBlockNormalCube()
 						|| !offsetState.isNormalCube()
 						|| offsetState.isTranslucent()
-						|| offsetState.getMaterial().isLiquid()
-						|| !offsetState.getMaterial().isSolid()
-						|| offsetState.getBlock() == Blocks.AIR) {
+						|| !offsetState.getMaterial().isSolid()) {
 					surrounded = false;
 					break;
 				}

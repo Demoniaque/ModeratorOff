@@ -2,9 +2,14 @@ package me.lordsaad.modeoff.common.items;
 
 import com.teamwizardry.librarianlib.features.base.item.ItemMod;
 import com.teamwizardry.librarianlib.features.utilities.client.ClientRunnable;
+import me.lordsaad.modeoff.api.capability.IModoffCapability;
+import me.lordsaad.modeoff.api.capability.ModoffCapabilityProvider;
+import me.lordsaad.modeoff.api.permissions.PermissionRegistry;
+import me.lordsaad.modeoff.api.plot.Plot;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.player.PlayerCapabilities;
 import net.minecraft.init.MobEffects;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.item.ItemStack;
@@ -59,13 +64,24 @@ public class ItemSpeed extends ItemMod {
 		}
 
 		if (playerIn instanceof EntityPlayerMP) {
-			SPacketPlayerAbilities packet = new SPacketPlayerAbilities();
-			packet.setFlySpeed(0.05f * (level + 1));
-			packet.setFlying(playerIn.capabilities.isFlying);
-			packet.setCreativeMode(playerIn.capabilities.isCreativeMode);
-			packet.setAllowFlying(playerIn.capabilities.allowFlying);
 
-			((EntityPlayerMP) playerIn).connection.sendPacket(packet);
+			PlayerCapabilities capabilities = playerIn.capabilities;
+			capabilities.setFlySpeed(0.05f * (level + 1));
+
+			capabilities.allowFlying = true;
+			capabilities.allowEdit = false;
+
+			IModoffCapability cap = ModoffCapabilityProvider.getCap(playerIn);
+			if (cap != null) {
+				Plot plot = cap.getEnclosingPlot();
+				if (plot != null) {
+
+					capabilities.allowFlying = !plot.hasPermission(PermissionRegistry.DefaultPermissions.PERMISSION_DISABLE_FLIGHT);
+					capabilities.allowEdit = !plot.hasPermission(PermissionRegistry.DefaultPermissions.PERMISSION_ENABLE_BLOCK_BREAKING);
+				}
+			}
+
+			((EntityPlayerMP) playerIn).connection.sendPacket(new SPacketPlayerAbilities(capabilities));
 
 			if (level == 0) playerIn.removePotionEffect(MobEffects.SPEED);
 			else playerIn.addPotionEffect(new PotionEffect(MobEffects.SPEED, 999999, level * 10, true, false));

@@ -1,25 +1,24 @@
 package me.lordsaad.modeoff.common;
 
+import com.google.common.collect.HashBiMap;
 import me.lordsaad.modeoff.ModItems;
 import me.lordsaad.modeoff.ModeratorOff;
-import me.lordsaad.modeoff.api.capability.DefaultModoffCapability;
-import me.lordsaad.modeoff.api.capability.IModoffCapability;
 import me.lordsaad.modeoff.api.capability.ModoffCapabilityProvider;
-import me.lordsaad.modeoff.api.capability.ModoffCapabilityStorage;
 import me.lordsaad.modeoff.api.plot.PlotRegistry;
 import me.lordsaad.modeoff.api.rank.RankRegistry;
 import me.lordsaad.modeoff.client.core.HudEventHandler;
 import me.lordsaad.modeoff.client.gui.GuiHandler;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.common.capabilities.CapabilityManager;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
-import static me.lordsaad.modeoff.server.ServerProxy.fetchRanks;
 
 import javax.annotation.Nullable;
 import java.io.File;
+import java.util.UUID;
+
+import static me.lordsaad.modeoff.server.ServerProxy.fetchRanks;
 
 /**
  * Created by LordSaad.
@@ -28,6 +27,8 @@ public class CommonProxy {
 
 	@Nullable
 	public static File directory = null;
+
+	public static HashBiMap<String, UUID> playerUUIDMap = HashBiMap.create();
 
 	public void preInit(FMLPreInitializationEvent event) {
 		ModItems.init();

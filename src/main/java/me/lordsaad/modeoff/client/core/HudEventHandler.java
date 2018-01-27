@@ -1,12 +1,25 @@
 package me.lordsaad.modeoff.client.core;
 
+import me.lordsaad.modeoff.api.plot.Plot;
+import me.lordsaad.modeoff.api.plot.PlotRegistry;
+import me.lordsaad.modeoff.common.CommonProxy;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.ScaledResolution;
+import net.minecraft.client.renderer.BufferBuilder;
+import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent.Post;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import org.lwjgl.opengl.GL11;
+
+import java.util.ArrayList;
+import java.util.Set;
+import java.util.UUID;
 
 /**
  * Created by Saad on 6/20/2016.
@@ -22,47 +35,54 @@ public class HudEventHandler extends Gui {
 		int height = resolution.getScaledHeight();
 		EntityPlayer player = Minecraft.getMinecraft().player;
 
-		//Plot plot = PlotRegistry.INSTANCE.findPlot(player.getPosition());
-		//if (plot != null) {
-		//	GlStateManager.pushMatrix();
-		//	GlStateManager.color(1.0F, 1.0F, 1.0F);
-		//	int right = ((width / 2) - (100 / 2)) + 145;
-		//	int top = height - 17;
-		//	emptyManaBar.draw(ClientTickHandler.getTicks(), right, top);
-		//	emptyBurnoutBar.draw(ClientTickHandler.getTicks(), right, top + 6);
-		//	GlStateManager.popMatrix();
-		//}
+		Plot plot = PlotRegistry.INSTANCE.findPlot(player.getPosition());
+		if (plot != null) {
+			int right = ((width / 2) - (100 / 2)) + 145;
+			int top = height - 17;
+			int paneWidth = 120, paneHeight = 70;
+			int r = 0, g = 0, b = 0, a = 100;
 
-		//ItemStack stack = BaublesSupport.getItem(player, ModItems.FAKE_HALO, ModItems.CREATIVE_HALO, ModItems.REAL_HALO);
-		//if (stack == null || stack.isEmpty()) return;
-//
-		//if (event.getType() == ElementType.EXPERIENCE) {
-//
-		//	HUD_TEXTURE.bind();
-//
-		//	GlStateManager.pushMatrix();
-		//	GlStateManager.color(1.0F, 1.0F, 1.0F);
-		//	int right = ((width / 2) - (100 / 2)) + 145;
-		//	int top = height - 17;
-		//	emptyManaBar.draw(ClientTickHandler.getTicks(), right, top);
-		//	emptyBurnoutBar.draw(ClientTickHandler.getTicks(), right, top + 6);
-		//	GlStateManager.popMatrix();
-//
-		//	CapManager manager = new CapManager(player);
-//
-		//	GlStateManager.pushMatrix();
-		//	GlStateManager.color(1.0F, 1.0F, 1.0F);
-		//	int visualManaLength = 0;
-		//	if (manager.getMana() > 0)
-		//		visualManaLength = (int) (((manager.getMana() * 100) / manager.getMaxMana()) % 101);
-		//	fullManaBar.drawClipped(ClientTickHandler.getTicks(), right, top, visualManaLength, 5);
-//
-		//	GlStateManager.color(1.0F, 1.0F, 1.0F);
-		//	int visualBurnoutLength = 0;
-		//	if (manager.getBurnout() > 0)
-		//		visualBurnoutLength = (int) (((manager.getBurnout() * 100) / manager.getMaxBurnout()) % 101);
-		//	fullBurnoutBar.drawClipped(ClientTickHandler.getTicks(), right, top + 6, visualBurnoutLength, 5);
-		//	GlStateManager.popMatrix();
-		//}
+			GlStateManager.pushMatrix();
+			GlStateManager.disableTexture2D();
+			GlStateManager.enableBlend();
+			GlStateManager.enableAlpha();
+
+			GlStateManager.translate(width - paneWidth, (height / 2.0) - paneHeight, 0);
+
+			Tessellator tessellator = Tessellator.getInstance();
+			BufferBuilder buffer = tessellator.getBuffer();
+
+			buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
+			buffer.pos(0, 0, 0).color(r, g, b, a).endVertex();
+			buffer.pos(0, paneHeight, 0).color(r, g, b, a).endVertex();
+			buffer.pos(paneWidth, paneHeight, 0).color(r, g, b, a).endVertex();
+			buffer.pos(paneWidth, 0, 0).color(r, g, b, a).endVertex();
+
+			tessellator.draw();
+
+			GlStateManager.enableTexture2D();
+
+			FontRenderer fontRenderer = Minecraft.getMinecraft().fontRenderer;
+
+			fontRenderer.drawString("Mod: " + plot.getModName(), 3, 3, 0xFFFFFF);
+
+			Set<UUID> authors = plot.getOwners();
+			if (authors.size() == 1) {
+				ArrayList<UUID> authorList = new ArrayList<>(authors);
+				fontRenderer.drawString("Author: " + CommonProxy.playerUUIDMap.inverse().get(authorList.get(0)), 3, 3 + fontRenderer.FONT_HEIGHT, 0xFFFFFF);
+			} else {
+				fontRenderer.drawString("Authors:", 3, 3 + fontRenderer.FONT_HEIGHT, 0xFFFFFF);
+				int count = 2;
+				for (UUID uuid : authors) {
+					String name = CommonProxy.playerUUIDMap.inverse().get(uuid);
+					fontRenderer.drawString("  | " + name, 3, 3 + (fontRenderer.FONT_HEIGHT * count), 0xFFFFFF);
+					count++;
+				}
+			}
+
+			GlStateManager.disableBlend();
+			GlStateManager.disableAlpha();
+			GlStateManager.popMatrix();
+		}
 	}
 }

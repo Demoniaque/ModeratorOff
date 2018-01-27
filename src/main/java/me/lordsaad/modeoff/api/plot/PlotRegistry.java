@@ -18,7 +18,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.HashSet;
-import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
@@ -97,6 +96,7 @@ public class PlotRegistry {
 		JsonObject object = new JsonObject();
 
 		object.addProperty("id", plot.getID());
+		object.addProperty("modName", plot.getModName());
 
 		JsonArray owners = new JsonArray();
 		for (UUID uuid : plot.getOwners()) {
@@ -126,8 +126,17 @@ public class PlotRegistry {
 			return;
 		}
 
+		if (!directory.exists()) directory.mkdirs();
+
 		int count = 0;
-		for (File file : Objects.requireNonNull(directory.listFiles())) {
+
+		File[] fileList = directory.listFiles();
+		if (fileList == null) {
+			ModeratorOff.logger.info("> Cannot loop through files in directory!");
+			return;
+		}
+
+		for (File file : fileList) {
 			if (file == null) continue;
 
 			if (!file.exists()) continue;
@@ -153,9 +162,11 @@ public class PlotRegistry {
 				JsonObject object = element.getAsJsonObject();
 
 				if (object.has("id") && object.get("id").isJsonPrimitive()
+						&& object.has("modName") && object.get("modName").isJsonPrimitive()
 						&& object.has("owners") && object.get("owners").isJsonArray()) {
 
 					int id = object.getAsJsonPrimitive("id").getAsInt();
+					String modName = object.getAsJsonPrimitive("modName").getAsString();
 
 					HashSet<UUID> uuids = new HashSet<>();
 					JsonArray owners = object.getAsJsonArray("owners");
@@ -168,7 +179,7 @@ public class PlotRegistry {
 						uuids.add(UUID.fromString(uuid));
 					}
 
-					Plot plot = new Plot(id, uuids);
+					Plot plot = new Plot(id, modName, uuids);
 
 					if (object.has("tags")) {
 						JsonArray tagsArray = object.getAsJsonArray("tags");

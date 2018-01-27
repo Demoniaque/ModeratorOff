@@ -106,6 +106,7 @@ public class ServerProxy extends CommonProxy {
 										+ uuid.substring(20);
 
 								RankRegistry.INSTANCE.rankMap.put(rank, UUID.fromString(uuid));
+								CommonProxy.playerUUIDMap.put(line, UUID.fromString(uuid));
 
 								ModeratorOff.logger.info("      > Found uuid for " + line + " -> " + uuid + ". Success!");
 							} else {

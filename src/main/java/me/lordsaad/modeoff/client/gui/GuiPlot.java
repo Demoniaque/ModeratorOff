@@ -2,37 +2,24 @@ package me.lordsaad.modeoff.client.gui;
 
 import com.teamwizardry.librarianlib.features.gui.GuiBase;
 import com.teamwizardry.librarianlib.features.gui.component.GuiComponent;
-import com.teamwizardry.librarianlib.features.gui.component.GuiComponentEvents;
 import com.teamwizardry.librarianlib.features.gui.components.ComponentRect;
-import com.teamwizardry.librarianlib.features.gui.components.ComponentVoid;
-import com.teamwizardry.librarianlib.features.gui.mixin.ScissorMixin;
-import com.teamwizardry.librarianlib.features.kotlin.ClientUtilMethods;
 import com.teamwizardry.librarianlib.features.network.PacketHandler;
 import com.teamwizardry.librarianlib.features.sprite.Sprite;
 import me.lordsaad.modeoff.ModeratorOff;
-import me.lordsaad.modeoff.api.ConfigValues;
 import me.lordsaad.modeoff.api.permissions.Permission;
 import me.lordsaad.modeoff.api.permissions.PermissionRegistry;
+import me.lordsaad.modeoff.api.permissions.defaultperms.PermissionGamemode;
+import me.lordsaad.modeoff.api.permissions.defaultperms.PermissionGamemodeCreative;
+import me.lordsaad.modeoff.api.permissions.defaultperms.PermissionGamemodeSpectator;
+import me.lordsaad.modeoff.api.permissions.defaultperms.PermissionGamemodeSurvival;
 import me.lordsaad.modeoff.api.plot.Plot;
-import me.lordsaad.modeoff.api.plot.PlotCacher;
-import me.lordsaad.modeoff.api.plot.PlotChunkCache;
 import me.lordsaad.modeoff.api.plot.PlotRegistry;
 import me.lordsaad.modeoff.common.network.PacketUpdatePlot;
-import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.BlockRendererDispatcher;
-import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.texture.TextureMap;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3i;
-import net.minecraft.world.ChunkCache;
-import org.lwjgl.opengl.GL11;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -47,6 +34,7 @@ public class GuiPlot extends GuiBase {
 	static final Sprite UNLOCKED = new Sprite(new ResourceLocation(ModeratorOff.MOD_ID, "textures/gui/unlocked.png"));
 	static final Sprite CHECKBOX_CHECKED = new Sprite(new ResourceLocation(ModeratorOff.MOD_ID, "textures/gui/checkbox_checked.png"));
 	static final Sprite CHECKBOX_XED = new Sprite(new ResourceLocation(ModeratorOff.MOD_ID, "textures/gui/checkbox_xed.png"));
+	static final Sprite CHECKBOX_RADIO = new Sprite(new ResourceLocation(ModeratorOff.MOD_ID, "textures/gui/checkbox_radio.png"));
 	private static String tag;
 	//private EnumMap<BlockRenderLayer, HashMultimap<Icacher.blockstate, BlockPos>> cacher.blocks = new EnumMap<>(BlockRenderLayer.class);
 	private HashSet<BlockPos> tempPosCache = new HashSet<>();
@@ -88,8 +76,8 @@ public class GuiPlot extends GuiBase {
 			return txt;
 		});
 
-		Permission blockPlacingPerm = PermissionRegistry.DefaultPermissions.PERMISSION_DISABLE_BLOCK_PLACING;
-		new ComponentButton(20, 20 + (++id * 20) + (id * buffer), compRect, "Disable Block Placing", plot.hasPermission(blockPlacingPerm) ? CHECKBOX_CHECKED : CHECKBOX_XED, (componentSprite, componentText) -> {
+		Permission blockPlacingPerm = PermissionRegistry.DefaultPermissions.PERMISSION_ENABLE_BLOCK_PLACING;
+		new ComponentButton(20, 20 + (++id * 20) + (id * buffer), compRect, "Enable Block Placing", plot.hasPermission(blockPlacingPerm) ? CHECKBOX_CHECKED : CHECKBOX_XED, (componentSprite, componentText) -> {
 			boolean hasPerm = plot.hasPermission(blockPlacingPerm);
 
 			if (hasPerm) {
@@ -108,8 +96,8 @@ public class GuiPlot extends GuiBase {
 			return txt;
 		});
 
-		Permission blockBreakingPerm = PermissionRegistry.DefaultPermissions.PERMISSION_DISABLE_BLOCK_BREAKING;
-		new ComponentButton(20, 20 + (++id * 20) + (id * buffer), compRect, "Disable Block Breaking", plot.hasPermission(blockBreakingPerm) ? CHECKBOX_CHECKED : CHECKBOX_XED, (componentSprite, componentText) -> {
+		Permission blockBreakingPerm = PermissionRegistry.DefaultPermissions.PERMISSION_ENABLE_BLOCK_BREAKING;
+		new ComponentButton(20, 20 + (++id * 20) + (id * buffer), compRect, "Enable Block Breaking", plot.hasPermission(blockBreakingPerm) ? CHECKBOX_CHECKED : CHECKBOX_XED, (componentSprite, componentText) -> {
 			boolean hasPerm = plot.hasPermission(blockBreakingPerm);
 
 			if (hasPerm) {
@@ -128,8 +116,8 @@ public class GuiPlot extends GuiBase {
 			return txt;
 		});
 
-		Permission leftClickingPerm = PermissionRegistry.DefaultPermissions.PERMISSION_DISABLE_BLOCK_LEFT_CLICKING;
-		new ComponentButton(20, 20 + (++id * 20) + (id * buffer), compRect, "Disable Block Left Clicking", plot.hasPermission(leftClickingPerm) ? CHECKBOX_CHECKED : CHECKBOX_XED, (componentSprite, componentText) -> {
+		Permission leftClickingPerm = PermissionRegistry.DefaultPermissions.PERMISSION_ENABLE_BLOCK_LEFT_CLICKING;
+		new ComponentButton(20, 20 + (++id * 20) + (id * buffer), compRect, "Enable Block Left Clicking", plot.hasPermission(leftClickingPerm) ? CHECKBOX_CHECKED : CHECKBOX_XED, (componentSprite, componentText) -> {
 			boolean hasPerm = plot.hasPermission(leftClickingPerm);
 
 			if (hasPerm) {
@@ -148,40 +136,110 @@ public class GuiPlot extends GuiBase {
 			return txt;
 		});
 
-		//if (false) {
-		Plot.PlotDimensions dimensions = plot.getDimensions();
-		BlockPos plotPos = new BlockPos(plot.getPlotPos().getXi(), ConfigValues.y, plot.getPlotPos().getYi());
-		BlockPos min = dimensions.getCorner1();
-		BlockPos max = dimensions.getCorner2();
-
-		ChunkCache blockAccess = new PlotChunkCache(Minecraft.getMinecraft().world, min.subtract(new Vec3i(3, 3, 3)), max.add(3, 3, 3), 0);
-
-		PlotCacher cacher = new PlotCacher(blockAccess, plot);
-
-		for (BlockRenderLayer layer : cacher.blocks.keySet()) {
-			Tessellator tes = Tessellator.getInstance();
-			BufferBuilder buffer0 = tes.getBuffer();
-			BlockRendererDispatcher dispatcher = Minecraft.getMinecraft().getBlockRendererDispatcher();
-
-			if (vboCaches.get(layer) == null) {
-
-				buffer0.begin(GL11.GL_QUADS, DefaultVertexFormats.BLOCK);
-
-				for (IBlockState state : cacher.blocks.get(layer).keySet()) {
-					for (BlockPos pos : cacher.blocks.get(layer).get(state)) {
-						BlockPos origin = pos.subtract(plotPos);
-						buffer0.setTranslation(-pos.getX() + origin.getX(), -pos.getY() + origin.getY(), -pos.getZ() + origin.getZ());
-						dispatcher.renderBlock(state, pos, blockAccess, buffer0);
-						buffer0.setTranslation(0, 0, 0);
-					}
-				}
-
-				vboCaches.put(layer, ClientUtilMethods.createCacheArrayAndReset(buffer0));
+		PermissionGamemode gamemodePerm = PermissionRegistry.DefaultPermissions.PERMISSION_GAMEMODE_ADVENTURE;
+		for (Permission permission : plot.getPermissions()) {
+			if (permission instanceof PermissionGamemode) {
+				gamemodePerm = (PermissionGamemode) permission;
 			}
 		}
 
-		// RENDER IT
-		{
+		String name = "Adventure";
+		if (gamemodePerm instanceof PermissionGamemodeSurvival) {
+			name = "Survival";
+		} else if (gamemodePerm instanceof PermissionGamemodeSpectator) {
+			name = "Spectator";
+		} else if (gamemodePerm instanceof PermissionGamemodeCreative) {
+			name = "Creative";
+		}
+
+		new ComponentButton(20, 20 + (++id * 20) + (id * buffer), compRect, "Gamemode " + name, CHECKBOX_RADIO, (componentSprite, componentText) -> {
+
+			String newName;
+
+			if (plot.hasPermission(PermissionRegistry.DefaultPermissions.PERMISSION_GAMEMODE_ADVENTURE)) {
+				plot.removePermission(PermissionRegistry.DefaultPermissions.PERMISSION_GAMEMODE_ADVENTURE);
+				plot.addPermission(PermissionRegistry.DefaultPermissions.PERMISSION_GAMEMODE_CREATIVE);
+				newName = "Creative";
+
+			} else if (plot.hasPermission(PermissionRegistry.DefaultPermissions.PERMISSION_GAMEMODE_CREATIVE)) {
+				plot.removePermission(PermissionRegistry.DefaultPermissions.PERMISSION_GAMEMODE_CREATIVE);
+				plot.addPermission(PermissionRegistry.DefaultPermissions.PERMISSION_GAMEMODE_SURVIVAL);
+				newName = "Surival";
+
+			} else if (plot.hasPermission(PermissionRegistry.DefaultPermissions.PERMISSION_GAMEMODE_SURVIVAL)) {
+				plot.removePermission(PermissionRegistry.DefaultPermissions.PERMISSION_GAMEMODE_SURVIVAL);
+				plot.addPermission(PermissionRegistry.DefaultPermissions.PERMISSION_GAMEMODE_SPECTATOR);
+				newName = "Spectator";
+
+			} else {
+				plot.removePermission(PermissionRegistry.DefaultPermissions.PERMISSION_GAMEMODE_SPECTATOR);
+				plot.addPermission(PermissionRegistry.DefaultPermissions.PERMISSION_GAMEMODE_ADVENTURE);
+				newName = "Adventure";
+			}
+
+			componentText.getText().setValue("Gamemode " + newName);
+
+			PacketHandler.NETWORK.sendToServer(new PacketUpdatePlot(plot));
+			Minecraft.getMinecraft().player.playSound(SoundEvents.BLOCK_NOTE_BELL, 1, 1f);
+		}).render.getTooltip().func((Function<GuiComponent, java.util.List<String>>) t -> {
+			List<String> txt = new ArrayList<>();
+			txt.add("If enabled, the left click block event will be cancelled to the viewers (your audience)");
+			return txt;
+		});
+
+		Permission flightPerm = PermissionRegistry.DefaultPermissions.PERMISSION_DISABLE_FLIGHT;
+		new ComponentButton(20, 20 + (++id * 20) + (id * buffer), compRect, "Disable Flight", plot.hasPermission(flightPerm) ? CHECKBOX_CHECKED : CHECKBOX_XED, (componentSprite, componentText) -> {
+			boolean hasPerm = plot.hasPermission(flightPerm);
+
+			if (hasPerm) {
+				plot.removePermission(flightPerm);
+				componentSprite.setSprite(CHECKBOX_XED);
+			} else {
+				plot.addPermission(flightPerm);
+				componentSprite.setSprite(CHECKBOX_CHECKED);
+			}
+
+			PacketHandler.NETWORK.sendToServer(new PacketUpdatePlot(plot));
+			Minecraft.getMinecraft().player.playSound(SoundEvents.BLOCK_NOTE_BELL, 1, hasPerm ? 2f : 1f);
+		}).render.getTooltip().func((Function<GuiComponent, java.util.List<String>>) t -> {
+			List<String> txt = new ArrayList<>();
+			txt.add("If enabled, the left click block event will be cancelled to the viewers (your audience)");
+			return txt;
+		});
+
+		/*{
+			PlotDimensions dimensions = plot.getDimensions();
+			BlockPos plotPos = new BlockPos(plot.getPlotPos().getXi(), ConfigValues.y, plot.getPlotPos().getYi());
+			BlockPos min = dimensions.getCorner1();
+			BlockPos max = dimensions.getCorner2();
+
+			ChunkCache blockAccess = new PlotChunkCache(Minecraft.getMinecraft().world, min.subtract(new Vec3i(3, 3, 3)), max.add(3, 3, 3), 0);
+
+			PlotCacher cacher = new PlotCacher(blockAccess, plot);
+
+			for (BlockRenderLayer layer : cacher.blocks.keySet()) {
+				Tessellator tes = Tessellator.getInstance();
+				BufferBuilder buffer0 = tes.getBuffer();
+				BlockRendererDispatcher dispatcher = Minecraft.getMinecraft().getBlockRendererDispatcher();
+
+				if (vboCaches.get(layer) == null) {
+
+					buffer0.begin(GL11.GL_QUADS, DefaultVertexFormats.BLOCK);
+
+					for (IBlockState state : cacher.blocks.get(layer).keySet()) {
+						for (BlockPos pos : cacher.blocks.get(layer).get(state)) {
+							BlockPos origin = pos.subtract(plotPos);
+							buffer0.setTranslation(-pos.getX() + origin.getX(), -pos.getY() + origin.getY(), -pos.getZ() + origin.getZ());
+							dispatcher.renderBlock(state, pos, blockAccess, buffer0);
+							buffer0.setTranslation(0, 0, 0);
+						}
+					}
+
+					vboCaches.put(layer, ClientUtilMethods.createCacheArrayAndReset(buffer0));
+				}
+			}
+
+			// RENDER IT
 
 			ComponentVoid sideView = new ComponentVoid(0, getGuiHeight() - 200, getGuiWidth(), 200);
 			getMainComponents().add(sideView);
@@ -223,8 +281,7 @@ public class GuiPlot extends GuiBase {
 				GlStateManager.disableCull();
 				GlStateManager.popMatrix();
 			});
-		}
+		}*/
 		// SIDE VIEW //
-		//}
 	}
 }

@@ -5,7 +5,6 @@ import com.google.common.collect.HashMultimap;
 import me.lordsaad.modeoff.api.capability.IModoffCapability;
 import me.lordsaad.modeoff.api.capability.ModoffCapabilityProvider;
 import me.lordsaad.modeoff.api.permissions.Permission;
-import me.lordsaad.modeoff.api.permissions.PermissionRegistry;
 import me.lordsaad.modeoff.api.rank.defaultranks.*;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
@@ -35,8 +34,12 @@ public class RankRegistry {
 		ranks.put(id, DefaultRanks.JUDGE);
 	}
 
-	public boolean isAdmin(EntityPlayer player) {
-		return getPermission(player).contains(PermissionRegistry.DefaultPermissions.PERMISSION_PLOT_ADMIN);
+	public boolean hasPermission(EntityPlayer player, Permission permission) {
+		return getPermission(player).contains(permission);
+	}
+
+	public boolean hasRank(EntityPlayer player, IRank rank) {
+		return getRank(player) == rank;
 	}
 
 	public Collection<Permission> getPermission(EntityPlayer player) {

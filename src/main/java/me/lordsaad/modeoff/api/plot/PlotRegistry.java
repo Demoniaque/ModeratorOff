@@ -73,6 +73,12 @@ public class PlotRegistry {
 		return null;
 	}
 
+	public void deletePlot(Plot plot) {
+		plots.remove(plot);
+
+		directory.toPath().resolve("plot_" + plot.getID() + ".json").toFile().delete();
+	}
+
 	public boolean isUUIDRegistered(UUID uuid) {
 		for (Plot plot : plots) {
 			for (UUID owner : plot.getOwners()) {

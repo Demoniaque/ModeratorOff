@@ -8,13 +8,18 @@ import me.lordsaad.modeoff.api.plot.Plot;
 import me.lordsaad.modeoff.api.plot.PlotRegistry;
 import me.lordsaad.modeoff.api.rank.IRank;
 import me.lordsaad.modeoff.api.rank.RankRegistry;
+import net.minecraft.client.entity.EntityPlayerSP;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.player.PlayerCapabilities;
+import net.minecraft.item.ItemStack;
 import net.minecraft.network.play.server.SPacketPlayerAbilities;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.GameType;
 import net.minecraftforge.event.ServerChatEvent;
+import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.item.ItemTossEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
@@ -28,6 +33,58 @@ import net.minecraftforge.fml.relauncher.Side;
  * Created by LordSaad.
  */
 public class EventHandler {
+
+	@SubscribeEvent
+	public void joinWorld(EntityJoinWorldEvent event) {
+		Entity entity = event.getEntity();
+		if (entity instanceof EntityPlayerSP) {
+			EntityPlayer player = (EntityPlayer) entity;
+
+			player.sendMessage(new TextComponentString(
+					TextFormatting.GRAY + "<<==============[ " + TextFormatting.GOLD + "ModOff" + TextFormatting.GRAY + " ]==============>>"));
+			player.sendMessage(new TextComponentString(" "));
+			player.sendMessage(new TextComponentString(TextFormatting.GRAY + "Welcome " + player.getName() + "!"));
+			player.sendMessage(new TextComponentString(" "));
+
+			if (RankRegistry.INSTANCE.hasRank(player, RankRegistry.DefaultRanks.CONTESTANT)) {
+
+				boolean hasPlot = PlotRegistry.INSTANCE.isUUIDRegistered(player.getUniqueID());
+				if (hasPlot)
+					player.sendMessage(new TextComponentString(TextFormatting.GRAY + "Do /plot tp to teleport to your plot."));
+				else
+					player.sendMessage(new TextComponentString(TextFormatting.GRAY + "Do /plot register to be automatically assigned a plot."));
+			} else {
+				player.sendMessage(new TextComponentString(TextFormatting.GRAY + "Use the 2 items in your hotbar to navigate around."));
+			}
+
+			player.sendMessage(new TextComponentString(" "));
+			player.sendMessage(new TextComponentString(
+					TextFormatting.GRAY + "<<====================================>>"));
+		} else if (entity instanceof EntityPlayerMP) {
+			EntityPlayer player = (EntityPlayer) entity;
+
+			player.setPositionAndUpdate(22.5, 100, 9.5);
+
+			ItemStack speed = new ItemStack(ModItems.SPEED);
+			if (!player.inventory.hasItemStack(speed)) {
+				if (player.addItemStackToInventory(speed)) {
+					player.inventory.setInventorySlotContents(0, new ItemStack(ModItems.SPEED));
+				}
+			}
+
+			ItemStack teleport = new ItemStack(ModItems.TELEPORT);
+			if (!player.inventory.hasItemStack(teleport)) {
+				if (player.addItemStackToInventory(teleport)) {
+					player.inventory.setInventorySlotContents(1, new ItemStack(ModItems.SPEED));
+				}
+			}
+		}
+	}
+
+	@SubscribeEvent
+	public void respawn(net.minecraftforge.fml.common.gameevent.PlayerEvent.PlayerRespawnEvent event) {
+		event.player.setPositionAndUpdate(22.5, 100, 9.5);
+	}
 
 	@SubscribeEvent
 	public void chat(ServerChatEvent event) {
@@ -59,7 +116,7 @@ public class EventHandler {
 
 		if (plot != null) {
 			if (!RankRegistry.INSTANCE.hasPermission(event.getEntityPlayer(), PermissionRegistry.DefaultPermissions.PERMISSION_PLOT_ADMIN)
-					&& ((!plot.hasPermission(PermissionRegistry.DefaultPermissions.PERMISSION_ENABLE_BLOCK_LEFT_CLICKING)
+					&& ((!plot.hasPermission(PermissionRegistry.DefaultPermissions.PERMISSION_ENABLE_BLOCK_BREAKING)
 					&& !plot.getOwners().contains(event.getEntityPlayer().getUniqueID()))
 					|| plot.hasPermission(PermissionRegistry.DefaultPermissions.PERMISSION_LOCK_PLOT))) {
 				event.setUseItem(Event.Result.DENY);
@@ -139,13 +196,18 @@ public class EventHandler {
 					if (curPlot != null) {
 						curPlot.onLeave(event.player);
 
-						event.player.setGameType(GameType.ADVENTURE);
+						boolean isPlotAdmin = RankRegistry.INSTANCE.hasPermission(event.player, PermissionRegistry.DefaultPermissions.PERMISSION_PLOT_ADMIN);
+
+						if (isPlotAdmin) event.player.setGameType(GameType.CREATIVE);
+						else event.player.setGameType(GameType.ADVENTURE);
 
 						if (event.player instanceof EntityPlayerMP) {
 							PlayerCapabilities capabilities = new PlayerCapabilities();
+
 							capabilities.allowFlying = true;
-							capabilities.allowEdit = false;
+							capabilities.allowEdit = isPlotAdmin;
 							capabilities.isFlying = event.player.capabilities.isFlying;
+
 							((EntityPlayerMP) event.player).connection.sendPacket(new SPacketPlayerAbilities(capabilities));
 						}
 					}
@@ -153,23 +215,38 @@ public class EventHandler {
 					if (plot != null) {
 						plot.onEnter(event.player);
 
-						if (plot.hasPermission(PermissionRegistry.DefaultPermissions.PERMISSION_GAMEMODE_CREATIVE)) {
-							event.player.setGameType(GameType.CREATIVE);
-						} else if (plot.hasPermission(PermissionRegistry.DefaultPermissions.PERMISSION_GAMEMODE_SPECTATOR)) {
-							event.player.setGameType(GameType.SPECTATOR);
-						} else if (plot.hasPermission(PermissionRegistry.DefaultPermissions.PERMISSION_GAMEMODE_SURVIVAL)) {
-							event.player.setGameType(GameType.SURVIVAL);
+						boolean isPlotAdmin = RankRegistry.INSTANCE.hasPermission(event.player, PermissionRegistry.DefaultPermissions.PERMISSION_PLOT_ADMIN);
+						if (!plot.isOwner(event.player) && !isPlotAdmin) {
+							if (plot.hasPermission(PermissionRegistry.DefaultPermissions.PERMISSION_GAMEMODE_CREATIVE)) {
+								event.player.setGameType(GameType.CREATIVE);
+							} else if (plot.hasPermission(PermissionRegistry.DefaultPermissions.PERMISSION_GAMEMODE_SPECTATOR)) {
+								event.player.setGameType(GameType.SPECTATOR);
+							} else if (plot.hasPermission(PermissionRegistry.DefaultPermissions.PERMISSION_GAMEMODE_SURVIVAL)) {
+								event.player.setGameType(GameType.SURVIVAL);
+							} else {
+								event.player.setGameType(GameType.ADVENTURE);
+							}
+
+							if (event.player instanceof EntityPlayerMP) {
+								PlayerCapabilities capabilities = new PlayerCapabilities();
+
+								capabilities.allowFlying = !plot.hasPermission(PermissionRegistry.DefaultPermissions.PERMISSION_DISABLE_FLIGHT);
+								capabilities.allowEdit =
+										plot.hasPermission(PermissionRegistry.DefaultPermissions.PERMISSION_ENABLE_BLOCK_BREAKING)
+												|| !plot.hasPermission(PermissionRegistry.DefaultPermissions.PERMISSION_LOCK_PLOT);
+
+								((EntityPlayerMP) event.player).connection.sendPacket(new SPacketPlayerAbilities(capabilities));
+							}
 						} else {
-							event.player.setGameType(GameType.ADVENTURE);
-						}
+							event.player.setGameType(GameType.CREATIVE);
+							if (event.player instanceof EntityPlayerMP) {
+								PlayerCapabilities capabilities = new PlayerCapabilities();
 
-						if (event.player instanceof EntityPlayerMP) {
-							PlayerCapabilities capabilities = new PlayerCapabilities();
+								capabilities.allowFlying = true;
+								capabilities.allowEdit = isPlotAdmin || !plot.hasPermission(PermissionRegistry.DefaultPermissions.PERMISSION_LOCK_PLOT);
 
-							capabilities.allowFlying = !plot.hasPermission(PermissionRegistry.DefaultPermissions.PERMISSION_DISABLE_FLIGHT);
-							capabilities.allowEdit = !plot.hasPermission(PermissionRegistry.DefaultPermissions.PERMISSION_ENABLE_BLOCK_BREAKING);
-
-							((EntityPlayerMP) event.player).connection.sendPacket(new SPacketPlayerAbilities(capabilities));
+								((EntityPlayerMP) event.player).connection.sendPacket(new SPacketPlayerAbilities(capabilities));
+							}
 						}
 					}
 				}

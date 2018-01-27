@@ -60,8 +60,8 @@ public class ItemTeleport extends ItemMod {
 			if (playerIn.isBeingRidden()) playerIn.getPassengers().forEach(Entity::dismountRidingEntity);
 			if (playerIn.dimension != 0) playerIn.changeDimension(0);
 
-			if (type.equalsIgnoreCase("spawn")) playerIn.setPositionAndUpdate(22.5, 200, 9.5);
-			else playerIn.setPositionAndUpdate(886.5, 200, 60.5);
+			if (type.equalsIgnoreCase("spawn")) playerIn.setPositionAndUpdate(22.5, 100, 9.5);
+			else playerIn.setPositionAndUpdate(886.5, 100, 60.5);
 
 			playerIn.getCooldownTracker().setCooldown(this, 20);
 		} else {

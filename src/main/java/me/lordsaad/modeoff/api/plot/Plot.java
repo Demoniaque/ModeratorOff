@@ -61,6 +61,14 @@ public final class Plot implements INBTSerializable<NBTTagCompound>, IPermission
 		this.playerInventory = playerInventory;
 	}
 
+	public boolean isOwner(EntityPlayer player) {
+		for (UUID uuid : owners) {
+			if (player.getUniqueID().equals(uuid))
+				return true;
+		}
+		return false;
+	}
+
 	public void teleport(EntityPlayer player) {
 		if (player.world.provider.getDimension() != ConfigValues.plotWorldDimensionID) {
 			player.changeDimension(ConfigValues.plotWorldDimensionID);

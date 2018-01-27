@@ -116,26 +116,6 @@ public class GuiPlot extends GuiBase {
 			return txt;
 		});
 
-		Permission leftClickingPerm = PermissionRegistry.DefaultPermissions.PERMISSION_ENABLE_BLOCK_LEFT_CLICKING;
-		new ComponentButton(20, 20 + (++id * 20) + (id * buffer), compRect, "Enable Block Left Clicking", plot.hasPermission(leftClickingPerm) ? CHECKBOX_CHECKED : CHECKBOX_XED, (componentSprite, componentText) -> {
-			boolean hasPerm = plot.hasPermission(leftClickingPerm);
-
-			if (hasPerm) {
-				plot.removePermission(leftClickingPerm);
-				componentSprite.setSprite(CHECKBOX_XED);
-			} else {
-				plot.addPermission(leftClickingPerm);
-				componentSprite.setSprite(CHECKBOX_CHECKED);
-			}
-
-			PacketHandler.NETWORK.sendToServer(new PacketUpdatePlot(plot));
-			Minecraft.getMinecraft().player.playSound(SoundEvents.BLOCK_NOTE_BELL, 1, hasPerm ? 2f : 1f);
-		}).render.getTooltip().func((Function<GuiComponent, java.util.List<String>>) t -> {
-			List<String> txt = new ArrayList<>();
-			txt.add("If enabled, the left click block event will be cancelled to the viewers (your audience)");
-			return txt;
-		});
-
 		PermissionGamemode gamemodePerm = PermissionRegistry.DefaultPermissions.PERMISSION_GAMEMODE_ADVENTURE;
 		for (Permission permission : plot.getPermissions()) {
 			if (permission instanceof PermissionGamemode) {

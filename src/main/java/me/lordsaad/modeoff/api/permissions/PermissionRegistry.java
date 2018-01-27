@@ -17,7 +17,6 @@ public class PermissionRegistry {
 		registerPermission(PERMISSION_LOCK_PLOT);
 		registerPermission(PERMISSION_ENABLE_BLOCK_BREAKING);
 		registerPermission(PERMISSION_ENABLE_BLOCK_PLACING);
-		registerPermission(PERMISSION_ENABLE_BLOCK_LEFT_CLICKING);
 		registerPermission(PERMISSION_PLOT_ADMIN);
 		registerPermission(PERMISSION_PLOT_REGISTER);
 		registerPermission(PERMISSION_DISABLE_FLIGHT);
@@ -47,7 +46,6 @@ public class PermissionRegistry {
 		public static final PermissionLockPlot PERMISSION_LOCK_PLOT = new PermissionLockPlot();
 		public static final PermissionBlockBreaking PERMISSION_ENABLE_BLOCK_BREAKING = new PermissionBlockBreaking();
 		public static final PermissionBlockPlacing PERMISSION_ENABLE_BLOCK_PLACING = new PermissionBlockPlacing();
-		public static final PermissionBlockLeftClicking PERMISSION_ENABLE_BLOCK_LEFT_CLICKING = new PermissionBlockLeftClicking();
 		public static final PermissionPlotAdmin PERMISSION_PLOT_ADMIN = new PermissionPlotAdmin();
 		public static final PermissionPlotRegister PERMISSION_PLOT_REGISTER = new PermissionPlotRegister();
 		public static final PermissionFlight PERMISSION_DISABLE_FLIGHT = new PermissionFlight();

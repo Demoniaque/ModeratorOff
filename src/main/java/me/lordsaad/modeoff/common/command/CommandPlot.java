@@ -63,6 +63,24 @@ public class CommandPlot extends CommandBase {
 				//	}
 				//}
 
+				case "delete": {
+					if (!RankRegistry.INSTANCE.getRank(getCommandSenderAsPlayer(sender)).hasPermission(PermissionRegistry.DefaultPermissions.PERMISSION_PLOT_REGISTER)) {
+						sender.sendMessage(new TextComponentString(TextFormatting.RED + "Insufficient Permissions. " + TextFormatting.RED + "You can't own a plot."));
+						return;
+					}
+
+					Plot plot = PlotRegistry.INSTANCE.getPlot(getCommandSenderAsPlayer(sender).getUniqueID());
+					if (plot != null) {
+						PlotRegistry.INSTANCE.deletePlot(plot);
+						sender.sendMessage(new TextComponentString(TextFormatting.GREEN + "Plot deleted successfully."));
+
+					} else {
+						sender.sendMessage(new TextComponentString(TextFormatting.RED + "You do not have a registered plot."));
+					}
+
+					return;
+				}
+
 				case "rename": {
 					if (!RankRegistry.INSTANCE.getRank(getCommandSenderAsPlayer(sender)).hasPermission(PermissionRegistry.DefaultPermissions.PERMISSION_PLOT_REGISTER)) {
 						sender.sendMessage(new TextComponentString(TextFormatting.RED + "Insufficient Permissions. " + TextFormatting.GRAY + "You can't register a plot to edit or manage."));
@@ -168,7 +186,8 @@ public class CommandPlot extends CommandBase {
 
 						EntityPlayer player = getCommandSenderAsPlayer(sender);
 
-						if (PlotRegistry.INSTANCE.isUUIDRegistered(player.getUniqueID())) {
+						if (!RankRegistry.INSTANCE.hasPermission(player, PermissionRegistry.DefaultPermissions.PERMISSION_PLOT_ADMIN)
+								&& PlotRegistry.INSTANCE.isUUIDRegistered(player.getUniqueID())) {
 							sender.sendMessage(new TextComponentString(TextFormatting.RED + "You already have a plot. " + TextFormatting.GRAY + "Do /plot tp to teleport to it."));
 							return;
 						}
@@ -213,7 +232,7 @@ public class CommandPlot extends CommandBase {
 								if (i < ownerList.size()) builder.append(", ");
 							}
 
-							player.sendMessage(new TextComponentString(TextFormatting.GREEN + "Team Members Included: " + builder.toString()));
+							player.sendMessage(new TextComponentString(TextFormatting.GREEN + "Team Members Included: " + TextFormatting.GRAY + builder.toString()));
 						}
 
 						if (!sender.getName().equals(player.getName()))

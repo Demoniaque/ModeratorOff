@@ -1,5 +1,7 @@
 package me.lordsaad.modeoff.api.plot;
 
+import com.google.common.collect.ObjectArrays;
+import com.google.common.collect.Sets;
 import com.teamwizardry.librarianlib.features.math.Vec2d;
 import me.lordsaad.modeoff.api.ConfigValues;
 import me.lordsaad.modeoff.api.Utils;
@@ -7,59 +9,72 @@ import me.lordsaad.modeoff.api.permissions.IPermissionHolder;
 import me.lordsaad.modeoff.api.permissions.Permission;
 import me.lordsaad.modeoff.api.permissions.PermissionRegistry;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.nbt.NBTTagString;
+import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.common.util.INBTSerializable;
-import org.jetbrains.annotations.NotNull;
+import net.minecraftforge.items.ItemHandlerHelper;
 
 import java.util.*;
 
-public class Plot implements INBTSerializable<NBTTagCompound>, IPermissionHolder {
+public final class Plot implements INBTSerializable<NBTTagCompound>, IPermissionHolder {
 
 	private int id;
+
 	private Set<UUID> owners;
+
 	private PlotDimensions dimensions;
 
-	private Set<Permission> permissions = new HashSet<>();
+	private Set<Permission> permissions;
 
-	public Plot(int id, @NotNull Set<UUID> owners) {
+	private NonNullList<ItemStack> playerInventory;
+
+	private Plot() {
+		this(Collections.emptySet());
+	}
+
+	public Plot(UUID ownerFirst, UUID... owners) {
+		this(Sets.newHashSet(ObjectArrays.concat(ownerFirst, owners)));
+	}
+
+	public Plot(Set<UUID> owners) {
+		this(PlotRegistry.INSTANCE.getNextAvailableID(), owners);
+	}
+
+	public Plot(int id, Set<UUID> owners) {
+		this(id, owners, new PlotDimensions(id), new HashSet<>(), NonNullList.create());
+	}
+
+	private Plot(int id, Set<UUID> owners, PlotDimensions dimensions, Set<Permission> permissions, NonNullList<ItemStack> playerInventory) {
 		this.id = id;
 		this.owners = owners;
-
-		dimensions = new PlotDimensions(id);
+		this.dimensions = dimensions;
+		this.permissions = permissions;
+		this.playerInventory = playerInventory;
 	}
 
-	public Plot(@NotNull Set<UUID> owners) {
-		this.id = PlotRegistry.INSTANCE.getNextAvailableID();
-		this.owners = owners;
-
-		dimensions = new PlotDimensions(id);
-	}
-
-	public Plot(UUID... owner) {
-		this.id = PlotRegistry.INSTANCE.getNextAvailableID();
-		this.owners = new HashSet<>();
-		owners.addAll(Arrays.asList(owner));
-
-		dimensions = new PlotDimensions(id);
-	}
-
-	public Plot() {
-		owners = new HashSet<>();
-	}
-
-	public void teleportToPlot(EntityPlayer player) {
-		if (player == null) return;
-
-		if (player.world.provider.getDimension() != ConfigValues.plotWorldDimensionID)
+	public void teleport(EntityPlayer player) {
+		if (player.world.provider.getDimension() != ConfigValues.plotWorldDimensionID) {
 			player.changeDimension(ConfigValues.plotWorldDimensionID);
+		}
 
 		Vec2d pos = getPlotPos();
 
 		player.setPositionAndUpdate(pos.getX(), ConfigValues.y, pos.getY());
+	}
+
+	public void onEnter(EntityPlayer player) {
+		for (ItemStack stack : playerInventory) {
+			ItemHandlerHelper.giveItemToPlayer(player, stack);	
+		}
+	}
+
+	public void onLeave(EntityPlayer player) {
+		
 	}
 
 	public Vec2d getPlotPos() {
@@ -71,7 +86,6 @@ public class Plot implements INBTSerializable<NBTTagCompound>, IPermissionHolder
 		return center;
 	}
 
-	@NotNull
 	public Collection<UUID> getOwners() {
 		return owners;
 	}
@@ -80,7 +94,6 @@ public class Plot implements INBTSerializable<NBTTagCompound>, IPermissionHolder
 		return id;
 	}
 
-	@NotNull
 	public PlotDimensions getDimensions() {
 		return dimensions;
 	}
@@ -119,17 +132,23 @@ public class Plot implements INBTSerializable<NBTTagCompound>, IPermissionHolder
 
 		compound.setTag("dimensions", dimensions.serializeNBT());
 
+		NBTTagList items = new NBTTagList();
+		for (ItemStack stack : playerInventory) {
+			items.appendTag(stack.serializeNBT());
+		}
+		compound.setTag("playerInventory", items);
 		return compound;
 	}
 
 	@Override
 	public void deserializeNBT(NBTTagCompound nbt) {
-		if (nbt.hasKey("id")) id = nbt.getInteger("id");
+		if (nbt.hasKey("id")) {
+			id = nbt.getInteger("id");
+		}
 
 		if (nbt.hasKey("owners")) {
-
+			owners.clear();
 			NBTTagList list = nbt.getTagList("owners", Constants.NBT.TAG_STRING);
-
 			for (int i = 0; i < list.tagCount(); i++) {
 				String owner = list.getStringTagAt(i);
 				owners.add(UUID.fromString(owner));
@@ -137,10 +156,8 @@ public class Plot implements INBTSerializable<NBTTagCompound>, IPermissionHolder
 		}
 
 		if (nbt.hasKey("permissions")) {
-			permissions = new HashSet<>();
-
+			permissions.clear();
 			NBTTagList list = nbt.getTagList("permissions", Constants.NBT.TAG_STRING);
-
 			for (int i = 0; i < list.tagCount(); i++) {
 				String tag = list.getStringTagAt(i);
 				permissions.add(PermissionRegistry.INSTANCE.getPermission(tag));
@@ -151,18 +168,27 @@ public class Plot implements INBTSerializable<NBTTagCompound>, IPermissionHolder
 			NBTTagCompound compound = nbt.getCompoundTag("dimensions");
 			dimensions = new PlotDimensions();
 			dimensions.deserializeNBT(compound);
+		}
 
+		if (nbt.hasKey("playerInventory")) {
+			playerInventory.clear();
+			NBTTagList items = nbt.getTagList("playerInventory", Constants.NBT.TAG_COMPOUND);
+			for (int i = 0; i < items.tagCount(); i++) {
+				playerInventory.add(new ItemStack(items.getCompoundTagAt(i)));
+			}
 		}
 	}
 
-	public void save() {
-		PlotRegistry.INSTANCE.savePlot(getID());
+	public static Plot deserialize(NBTTagCompound compound) {
+		Plot plot = new Plot();
+		plot.deserializeNBT(compound);
+		return plot;
 	}
 
-	public class PlotDimensions implements INBTSerializable<NBTTagCompound> {
+	public static final class PlotDimensions implements INBTSerializable<NBTTagCompound> {
 		private BlockPos corner1, corner2;
 
-		PlotDimensions(int plotID) {
+		private PlotDimensions(int plotID) {
 			Vec2d center = Utils.spiralLocFromID(plotID, Vec2d.ZERO);
 
 			center = center.mul(ConfigValues.plotSize + ConfigValues.plotMarginWidth);
@@ -173,7 +199,7 @@ public class Plot implements INBTSerializable<NBTTagCompound>, IPermissionHolder
 			corner2 = new BlockPos(center.getX() + (ConfigValues.plotSize / 2), ConfigValues.y, center.getY() + (ConfigValues.plotSize / 2));
 		}
 
-		public PlotDimensions() {
+		private PlotDimensions() {
 		}
 
 		public BlockPos getCorner1() {

@@ -19,13 +19,14 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 
 public class PlotRegistry {
 
 	public final static PlotRegistry INSTANCE = new PlotRegistry();
 
-	public HashSet<Plot> plots = new HashSet<>();
+	public Set<Plot> plots = new HashSet<>();
 
 	private File directory;
 

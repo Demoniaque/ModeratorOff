@@ -13,6 +13,7 @@ import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 import net.minecraftforge.fml.relauncher.Side;
 
 import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Created by LordSaad.
@@ -20,11 +21,11 @@ import java.util.HashSet;
 @PacketRegister(Side.CLIENT)
 public class PacketSyncPlots extends PacketBase {
 
-	private HashSet<Plot> plots;
+	private Set<Plot> plots;
 
 	public PacketSyncPlots() {}
 
-	public PacketSyncPlots(HashSet<Plot> plots) {
+	public PacketSyncPlots(Set<Plot> plots) {
 		this.plots = plots;
 	}
 
@@ -34,10 +35,7 @@ public class PacketSyncPlots extends PacketBase {
 		if (compound == null) return;
 		NBTTagList list = compound.getTagList("list", Constants.NBT.TAG_COMPOUND);
 		for (int i = 0; i < list.tagCount(); i++) {
-			NBTTagCompound compound1 = list.getCompoundTagAt(i);
-			Plot plot = new Plot();
-			plot.deserializeNBT(compound1);
-			plots.add(plot);
+			plots.add(Plot.deserialize(list.getCompoundTagAt(i)));
 		}
 	}
 

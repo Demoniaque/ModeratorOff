@@ -101,7 +101,7 @@ public class CommandPlot extends CommandBase {
 
 					Plot plot = PlotRegistry.INSTANCE.getPlot(player.getUniqueID());
 					if (plot != null) {
-						plot.teleportToPlot(getCommandSenderAsPlayer(sender));
+						plot.teleport(getCommandSenderAsPlayer(sender));
 
 						sender.sendMessage(new TextComponentString(TextFormatting.GREEN + "Teleported to [" + TextFormatting.GOLD + player.getName() + "]'s plot successfully."));
 
@@ -137,7 +137,7 @@ public class CommandPlot extends CommandBase {
 					}
 
 					Plot plot = PlotRegistry.INSTANCE.registerPlot(new Plot(player.getUniqueID()));
-					plot.teleportToPlot(player);
+					plot.teleport(player);
 
 					player.sendMessage(new TextComponentString(TextFormatting.GREEN + "Your plot has been registered successfully! " + TextFormatting.GRAY + " Plot ID: [" + TextFormatting.GREEN + plot.getID() + TextFormatting.GRAY + "]"));
 					if (!sender.getName().equals(player.getName()))

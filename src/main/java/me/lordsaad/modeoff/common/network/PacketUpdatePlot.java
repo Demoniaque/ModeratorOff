@@ -29,9 +29,9 @@ public class PacketUpdatePlot extends PacketBase {
 
 	@SaveMethodSetter(saveName = "manual_saver")
 	private void manualSaveSetter(NBTTagCompound compound) {
-		plot = new Plot();
-		if (compound == null) return;
-		plot.deserializeNBT(compound);
+		if (compound != null) {
+			plot = Plot.deserialize(compound);
+		}
 	}
 
 	@SaveMethodGetter(saveName = "manual_saver")

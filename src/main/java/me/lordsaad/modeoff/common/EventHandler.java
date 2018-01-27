@@ -127,10 +127,15 @@ public class EventHandler {
 		if (event.phase == TickEvent.Phase.END && event.side == Side.SERVER && event.player.ticksExisted % 4 == 0) {
 			IModoffCapability cap = ModoffCapabilityProvider.getCap(event.player);
 			if (cap != null) {
-				Plot prevPlot = cap.getEnclosingPlot();
-				Plot plot;
-				if (prevPlot != (plot = PlotRegistry.INSTANCE.findPlot(event.player.getPosition()))) {
+				Plot curPlot = cap.getEnclosingPlot(), plot;
+				if (curPlot != (plot = PlotRegistry.INSTANCE.findPlot(event.player.getPosition()))) {
 					cap.setEnclosingPlot(plot);
+					if (curPlot != null) {
+						curPlot.onLeave(event.player);
+					}
+					if (plot != null) {
+						plot.onEnter(event.player);	
+					}
 				}
 			}
 		}

@@ -7,6 +7,7 @@ import me.lordsaad.modeoff.api.capability.ModoffCapabilityProvider;
 import me.lordsaad.modeoff.api.permissions.Permission;
 import me.lordsaad.modeoff.api.permissions.PermissionRegistry;
 import me.lordsaad.modeoff.api.rank.defaultranks.*;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -51,18 +52,19 @@ public class RankRegistry {
 
 	@SubscribeEvent
 	public void joinWorld(EntityJoinWorldEvent event) {
-		if (event.getEntity() instanceof EntityPlayer) {
-
-			IModoffCapability cap = ModoffCapabilityProvider.getCap(event.getEntity());
-			if (cap == null) return;
-
-			rankMap.forEach((iRank, uuid) -> {
-				if (uuid.equals(event.getEntity().getUniqueID())) {
-					if (cap.getRank() == iRank) return;
-					cap.setRank(iRank);
-					cap.dataChanged(event.getEntity());
-				}
-			});
+		Entity entity = event.getEntity();
+		if (entity instanceof EntityPlayer) {
+			EntityPlayer player = (EntityPlayer) entity; 
+			IModoffCapability cap = ModoffCapabilityProvider.getCap(player);
+			if (cap != null) {
+				rankMap.forEach((iRank, uuid) -> {
+					if (uuid.equals(player.getUniqueID())) {
+						if (cap.getRank() == iRank) return;
+						cap.setRank(iRank);
+						cap.dataChanged(player);
+					}
+				});
+			}
 		}
 	}
 

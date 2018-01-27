@@ -68,14 +68,14 @@ public class EventHandler {
 			ItemStack speed = new ItemStack(ModItems.SPEED);
 			if (!player.inventory.hasItemStack(speed)) {
 				if (player.addItemStackToInventory(speed)) {
-					player.inventory.setInventorySlotContents(0, new ItemStack(ModItems.SPEED));
+					player.inventory.setInventorySlotContents(0, speed);
 				}
 			}
 
 			ItemStack teleport = new ItemStack(ModItems.TELEPORT);
 			if (!player.inventory.hasItemStack(teleport)) {
 				if (player.addItemStackToInventory(teleport)) {
-					player.inventory.setInventorySlotContents(1, new ItemStack(ModItems.SPEED));
+					player.inventory.setInventorySlotContents(1, teleport);
 				}
 			}
 		}

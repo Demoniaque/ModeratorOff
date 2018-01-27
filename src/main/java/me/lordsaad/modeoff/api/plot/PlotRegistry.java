@@ -33,12 +33,13 @@ public class PlotRegistry {
 	}
 
 	public int getNextAvailableID() {
-		int largestID = -1;
-		for (Plot plot : plots) {
-			if (largestID < plot.getID()) largestID = plot.getID();
+		int id = 0;
+
+		while (PlotRegistry.INSTANCE.getPlot(id) != null) {
+			id++;
 		}
 
-		return ++largestID;
+		return id;
 	}
 
 	public Plot registerPlot(Plot plot) {

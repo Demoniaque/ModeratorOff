@@ -111,27 +111,46 @@ public class CommandPlot extends CommandBase {
 				}
 
 				case "tp": {
-					EntityPlayer player;
 					if (args.length == 1) {
 						if (!RankRegistry.INSTANCE.getRank(getCommandSenderAsPlayer(sender)).hasPermission(PermissionRegistry.DefaultPermissions.PERMISSION_PLOT_REGISTER)) {
-							sender.sendMessage(new TextComponentString(TextFormatting.RED + "Insufficient Permissions. " + TextFormatting.GREEN + "You can't own a plot to teleport to. Specify a username to teleport to their plot instead."));
+							sender.sendMessage(new TextComponentString(TextFormatting.RED + "Insufficient Permissions. " + TextFormatting.RED + "You can't own a plot to teleport to. Specify a username or mod name to teleport to someone else's plot instead."));
 							return;
 						}
-						player = getCommandSenderAsPlayer(sender);
-					} else player = getPlayer(server, sender, args[1]);
 
-					Plot plot = PlotRegistry.INSTANCE.getPlot(player.getUniqueID());
-					if (plot != null) {
-						plot.teleport(getCommandSenderAsPlayer(sender));
+						Plot plot = PlotRegistry.INSTANCE.getPlot(getCommandSenderAsPlayer(sender).getUniqueID());
+						if (plot != null) {
+							plot.teleport(getCommandSenderAsPlayer(sender));
+							sender.sendMessage(new TextComponentString(TextFormatting.GRAY + "Teleported to plot [" + TextFormatting.GOLD + plot.getModName() + TextFormatting.GRAY + "] successfully."));
 
-						sender.sendMessage(new TextComponentString(TextFormatting.GREEN + "Teleported to [" + TextFormatting.GOLD + player.getName() + TextFormatting.GRAY + "]'s plot successfully."));
+						} else {
+							sender.sendMessage(new TextComponentString(TextFormatting.RED + "You do not have a registered plot."));
+							return;
+						}
 
-					} else
-						sender.sendMessage(new TextComponentString(TextFormatting.RED + "Plot does not exist. "
-								+ (player.getName().equalsIgnoreCase(sender.getName()) ?
-								TextFormatting.GRAY + "You don't have a registered plot." :
-								TextFormatting.GRAY + "[" + TextFormatting.GOLD + player.getName() + TextFormatting.GRAY + "] does not have a registered plot.")));
+					} else {
+						for (Plot plot : PlotRegistry.INSTANCE.plots) {
+							if (plot.getModName().equals(args[1].toLowerCase(Locale.ROOT))) {
+								plot.teleport(getCommandSenderAsPlayer(sender));
+								sender.sendMessage(new TextComponentString(TextFormatting.GRAY + "Teleported to plot [" + TextFormatting.GOLD + plot.getModName() + TextFormatting.GRAY + "] successfully."));
+								return;
+							}
+						}
 
+						if (!CommonProxy.playerUUIDMap.containsKey(args[1])) {
+							sender.sendMessage(new TextComponentString(TextFormatting.RED + "No plot or player named [" + TextFormatting.GOLD + args[1] + TextFormatting.RED + "] could be found."));
+							return;
+						}
+
+						Plot plot = PlotRegistry.INSTANCE.getPlot(CommonProxy.playerUUIDMap.get(args[1]));
+						if (plot != null) {
+							plot.teleport(getCommandSenderAsPlayer(sender));
+							sender.sendMessage(new TextComponentString(TextFormatting.GRAY + "Teleported to plot [" + TextFormatting.GOLD + plot.getModName() + TextFormatting.GRAY + "] successfully."));
+
+						} else {
+							sender.sendMessage(new TextComponentString(TextFormatting.RED + "No plot or player named [" + TextFormatting.GOLD + args[1] + TextFormatting.RED + "] could be found."));
+							return;
+						}
+					}
 					return;
 				}
 
@@ -152,6 +171,13 @@ public class CommandPlot extends CommandBase {
 						if (PlotRegistry.INSTANCE.isUUIDRegistered(player.getUniqueID())) {
 							sender.sendMessage(new TextComponentString(TextFormatting.RED + "You already have a plot. " + TextFormatting.GRAY + "Do /plot tp to teleport to it."));
 							return;
+						}
+
+						for (Plot plot : PlotRegistry.INSTANCE.plots) {
+							if (plot.getModName().equalsIgnoreCase(modName)) {
+								sender.sendMessage(new TextComponentString(TextFormatting.RED + "A plot with that name is already registered! Either try another name or contact an Admin."));
+								return;
+							}
 						}
 
 						Set<UUID> owners = new HashSet<>();

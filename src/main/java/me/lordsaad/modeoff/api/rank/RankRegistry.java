@@ -57,7 +57,7 @@ public class RankRegistry {
 	public void joinWorld(EntityJoinWorldEvent event) {
 		Entity entity = event.getEntity();
 		if (entity instanceof EntityPlayer) {
-			EntityPlayer player = (EntityPlayer) entity; 
+			EntityPlayer player = (EntityPlayer) entity;
 			IModoffCapability cap = ModoffCapabilityProvider.getCap(player);
 			if (cap != null) {
 				rankMap.forEach((iRank, uuid) -> {

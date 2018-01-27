@@ -10,9 +10,7 @@ import me.lordsaad.modeoff.api.rank.IRank;
 import me.lordsaad.modeoff.api.rank.RankRegistry;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.player.PlayerCapabilities;
-import net.minecraft.init.MobEffects;
 import net.minecraft.network.play.server.SPacketPlayerAbilities;
-import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.GameType;
@@ -127,7 +125,7 @@ public class EventHandler {
 	public void onTick(TickEvent.PlayerTickEvent event) {
 		if (event.phase == TickEvent.Phase.END && event.side == Side.SERVER && event.player.ticksExisted % 4 == 0) {
 
-			event.player.addPotionEffect(new PotionEffect(MobEffects.JUMP_BOOST, 999, 1, true, false));
+			//event.player.addPotionEffect(new PotionEffect(MobEffects.JUMP_BOOST, 999, 1, true, false));
 			event.player.setHealth(20f);
 			event.player.getFoodStats().setFoodSaturationLevel(20f);
 			event.player.getFoodStats().setFoodLevel(20);

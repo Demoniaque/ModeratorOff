@@ -93,6 +93,7 @@ public class ServerProxy extends CommonProxy {
 						UUID uuid = lookupPlayerUUID(playerName);
 						if (uuid == null) {
 							ModeratorOff.logger.info("    > Failed to find uuid for '" + playerName + "'");
+							continue;
 						} else {
 							ModeratorOff.logger.info("    > Found uuid for '" + playerName + "' -> " + uuid.toString());
 						}
@@ -113,6 +114,7 @@ public class ServerProxy extends CommonProxy {
 								UUID uuid = lookupPlayerUUID(playerName);
 								if (uuid == null) {
 									ModeratorOff.logger.info("    > Failed to find uuid for '" + playerName + "'");
+									continue;
 								} else {
 									ModeratorOff.logger.info("    > Found uuid for '" + playerName + "' -> " + uuid.toString());
 								}

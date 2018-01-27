@@ -1,6 +1,8 @@
 package me.lordsaad.modeoff.common;
 
 import me.lordsaad.modeoff.ModItems;
+import me.lordsaad.modeoff.api.capability.IModoffCapability;
+import me.lordsaad.modeoff.api.capability.ModoffCapabilityProvider;
 import me.lordsaad.modeoff.api.permissions.PermissionRegistry;
 import me.lordsaad.modeoff.api.plot.Plot;
 import me.lordsaad.modeoff.api.plot.PlotRegistry;
@@ -15,6 +17,8 @@ import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.fml.common.eventhandler.Event;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent;
+import net.minecraftforge.fml.relauncher.Side;
 
 /**
  * Created by LordSaad.
@@ -115,6 +119,20 @@ public class EventHandler {
 			}
 		} else {
 			event.setCanceled(true);
+		}
+	}
+
+	@SubscribeEvent
+	public void onTick(TickEvent.PlayerTickEvent event) {
+		if (event.phase == TickEvent.Phase.END && event.side == Side.SERVER && event.player.ticksExisted % 4 == 0) {
+			IModoffCapability cap = ModoffCapabilityProvider.getCap(event.player);
+			if (cap != null) {
+				Plot prevPlot = cap.getEnclosingPlot();
+				Plot plot;
+				if (prevPlot != (plot = PlotRegistry.INSTANCE.findPlot(event.player.getPosition()))) {
+					cap.setEnclosingPlot(plot);
+				}
+			}
 		}
 	}
 }

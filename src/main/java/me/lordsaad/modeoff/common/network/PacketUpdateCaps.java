@@ -7,7 +7,7 @@ import com.teamwizardry.librarianlib.features.saving.Save;
 import me.lordsaad.modeoff.api.capability.IModoffCapability;
 import me.lordsaad.modeoff.api.capability.ModoffCapabilityProvider;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTBase;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 import net.minecraftforge.fml.relauncher.Side;
 import org.jetbrains.annotations.NotNull;
@@ -15,25 +15,22 @@ import org.jetbrains.annotations.NotNull;
 @PacketRegister(Side.CLIENT)
 public class PacketUpdateCaps extends PacketBase {
 
-
 	@Save
-	private NBTTagCompound tags;
+	private NBTBase tag;
 
 	public PacketUpdateCaps() {
 	}
 
-	public PacketUpdateCaps(NBTTagCompound tag) {
-		tags = tag;
+	public PacketUpdateCaps(NBTBase tag) {
+		this.tag = tag;
 	}
 
 	@Override
 	public void handle(@NotNull MessageContext ctx) {
 		EntityPlayer player = LibrarianLib.PROXY.getClientPlayer();
-
 		IModoffCapability cap = ModoffCapabilityProvider.getCap(player);
-
 		if (cap != null) {
-			cap.loadNBTData(tags);
+			ModoffCapabilityProvider.capability().readNBT(cap, null, tag);
 		}
 	}
 }

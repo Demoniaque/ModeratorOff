@@ -3,12 +3,14 @@ package me.lordsaad.modeoff.api.capability;
 import com.teamwizardry.librarianlib.features.network.PacketHandler;
 import com.teamwizardry.librarianlib.features.saving.Savable;
 import com.teamwizardry.librarianlib.features.saving.Save;
+import me.lordsaad.modeoff.api.plot.Plot;
 import me.lordsaad.modeoff.api.rank.IRank;
 import me.lordsaad.modeoff.api.rank.RankRegistry;
 import me.lordsaad.modeoff.common.network.PacketUpdateCaps;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.nbt.NBTTagCompound;
+
+import javax.annotation.Nullable;
 
 /**
  * Created by Saad on 8/16/2016.
@@ -18,6 +20,9 @@ public class DefaultModoffCapability implements IModoffCapability {
 
 	@Save
 	private int rankID = 1;
+
+	@Nullable
+	private Plot enclosingPlot;
 
 	public DefaultModoffCapability() {
 	}
@@ -42,19 +47,20 @@ public class DefaultModoffCapability implements IModoffCapability {
 		this.rankID = rankID;
 	}
 
+	@Nullable
 	@Override
-	public NBTTagCompound saveNBTData() {
-		return (NBTTagCompound) ModoffCapabilityStorage.INSTANCE.writeNBT(ModoffCapabilityProvider.modoffCapability, this, null);
+	public Plot getEnclosingPlot() {
+		return enclosingPlot;
 	}
 
 	@Override
-	public void loadNBTData(NBTTagCompound compound) {
-		ModoffCapabilityStorage.INSTANCE.readNBT(ModoffCapabilityProvider.modoffCapability, this, null, compound);
+	public void setEnclosingPlot(@Nullable Plot enclosingPlot) {
+		this.enclosingPlot = enclosingPlot;
 	}
 
 	@Override
 	public void dataChanged(Entity entity) {
-		if ((entity != null) && entity instanceof EntityPlayerMP && !entity.getEntityWorld().isRemote)
-			PacketHandler.NETWORK.sendTo(new PacketUpdateCaps(saveNBTData()), (EntityPlayerMP) entity);
+		if (entity instanceof EntityPlayerMP)
+			PacketHandler.NETWORK.sendTo(new PacketUpdateCaps(ModoffCapabilityProvider.capability().writeNBT(this, null)), (EntityPlayerMP) entity);
 	}
 }

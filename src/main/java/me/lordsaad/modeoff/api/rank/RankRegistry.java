@@ -2,17 +2,12 @@ package me.lordsaad.modeoff.api.rank;
 
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.HashMultimap;
-import me.lordsaad.modeoff.ModeratorOff;
-import me.lordsaad.modeoff.api.capability.DefaultModoffCapability;
 import me.lordsaad.modeoff.api.capability.IModoffCapability;
 import me.lordsaad.modeoff.api.capability.ModoffCapabilityProvider;
 import me.lordsaad.modeoff.api.permissions.Permission;
 import me.lordsaad.modeoff.api.permissions.PermissionRegistry;
 import me.lordsaad.modeoff.api.rank.defaultranks.*;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import org.jetbrains.annotations.NotNull;
@@ -52,14 +47,6 @@ public class RankRegistry {
 	public IRank getRank(EntityPlayer player) {
 		IModoffCapability cap = ModoffCapabilityProvider.getCap(player);
 		return cap == null ? DefaultRanks.NORMAL : cap.getRank();
-	}
-
-	@SubscribeEvent
-	public void onAddCapabilities(AttachCapabilitiesEvent<Entity> e) {
-		if (e.getObject() instanceof EntityPlayer) {
-			ModoffCapabilityProvider provider = new ModoffCapabilityProvider(new DefaultModoffCapability());
-			e.addCapability(new ResourceLocation(ModeratorOff.MOD_ID, "capabilities"), provider);
-		}
 	}
 
 	@SubscribeEvent

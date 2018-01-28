@@ -3,6 +3,9 @@ package me.lordsaad.modeoff.api.plot;
 import com.google.common.collect.ObjectArrays;
 import com.google.common.collect.Sets;
 import com.teamwizardry.librarianlib.features.math.Vec2d;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
+import it.unimi.dsi.fastutil.ints.IntList;
+import it.unimi.dsi.fastutil.ints.IntListIterator;
 import me.lordsaad.modeoff.api.ConfigValues;
 import me.lordsaad.modeoff.api.Utils;
 import me.lordsaad.modeoff.api.permissions.IPermissionHolder;
@@ -13,14 +16,16 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.nbt.NBTTagString;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.NonNullList;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.common.util.INBTSerializable;
+import net.minecraftforge.items.CapabilityItemHandler;
+import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemHandlerHelper;
 
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.IntStream;
 
 public final class Plot implements INBTSerializable<NBTTagCompound>, IPermissionHolder {
 
@@ -83,10 +88,30 @@ public final class Plot implements INBTSerializable<NBTTagCompound>, IPermission
 		for (ItemStack stack : playerInventory) {
 			ItemHandlerHelper.giveItemToPlayer(player, stack);
 		}
+		player.inventoryContainer.detectAndSendChanges();
 	}
 
 	public void onLeave(EntityPlayer player) {
-
+		IItemHandler handler = player.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, EnumFacing.UP);
+		if (handler != null) {
+			Deque<ItemStack> toRemove = new ArrayDeque<>(playerInventory);
+			//noinspection MismatchedQueryAndUpdateOfCollection
+			IntList slots = new IntArrayList(IntStream.range(0, handler.getSlots()).iterator());
+			ItemStack ref;
+			while ((ref = toRemove.poll()) != null) {
+				IntListIterator slotIter = slots.iterator();
+				while (slotIter.hasNext()) {
+					int slot = slotIter.nextInt();
+					ItemStack stack = handler.extractItem(slot, Integer.MAX_VALUE, true);
+					if (ItemStack.areItemsEqualIgnoreDurability(ref, stack) && ItemStack.areItemStackTagsEqual(ref, stack)) {
+						handler.extractItem(slot, Integer.MAX_VALUE, false);
+						slotIter.remove();
+						break;
+					}
+				}
+			}
+			player.inventoryContainer.detectAndSendChanges();
+		}
 	}
 
 	public Vec2d getPlotPos() {

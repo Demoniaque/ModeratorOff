@@ -39,8 +39,13 @@ public class HudEventHandler extends Gui {
 		if (plot != null) {
 			int right = ((width / 2) - (100 / 2)) + 145;
 			int top = height - 17;
-			int paneWidth = 120, paneHeight = 70;
+			int paneWidth = 100, paneHeight;
 			int r = 0, g = 0, b = 0, a = 100;
+
+			Set<UUID> authors = plot.getOwners();
+			FontRenderer fontRenderer = Minecraft.getMinecraft().fontRenderer;
+
+			paneHeight = 6 + fontRenderer.FONT_HEIGHT * 2 + fontRenderer.FONT_HEIGHT * authors.size();
 
 			GlStateManager.pushMatrix();
 			GlStateManager.disableTexture2D();
@@ -62,11 +67,8 @@ public class HudEventHandler extends Gui {
 
 			GlStateManager.enableTexture2D();
 
-			FontRenderer fontRenderer = Minecraft.getMinecraft().fontRenderer;
-
 			fontRenderer.drawString("Mod: " + plot.getModName(), 3, 3, 0xFFFFFF);
 
-			Set<UUID> authors = plot.getOwners();
 			if (authors.size() == 1) {
 				ArrayList<UUID> authorList = new ArrayList<>(authors);
 				fontRenderer.drawString("Author: " + CommonProxy.playerUUIDMap.inverse().get(authorList.get(0)), 3, 3 + fontRenderer.FONT_HEIGHT, 0xFFFFFF);
@@ -79,6 +81,7 @@ public class HudEventHandler extends Gui {
 					count++;
 				}
 			}
+
 
 			GlStateManager.disableBlend();
 			GlStateManager.disableAlpha();

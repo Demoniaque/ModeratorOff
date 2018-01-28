@@ -42,14 +42,18 @@ public class GuiPlot extends GuiBase {
 
 	private int tick;
 
-	public GuiPlot() {
+	public GuiPlot(int plotID) {
 		super(400, 400);
 
 		ComponentRect compRect = new ComponentRect(0, 0, getGuiWidth(), getGuiHeight());
 		compRect.getColor().setValue(new Color(0x99FFFFFF, true));
 		getMainComponents().add(compRect);
 
-		Plot plot = PlotRegistry.INSTANCE.getPlot(Minecraft.getMinecraft().player.getUniqueID());
+		Plot plot;
+		if (plotID == -1)
+			plot = PlotRegistry.INSTANCE.getPlot(Minecraft.getMinecraft().player.getUniqueID());
+		else plot = PlotRegistry.INSTANCE.getPlot(plotID);
+
 		if (plot == null) return;
 		if (Minecraft.getMinecraft().world == null || Minecraft.getMinecraft().player == null) return;
 
@@ -163,7 +167,7 @@ public class GuiPlot extends GuiBase {
 			Minecraft.getMinecraft().player.playSound(SoundEvents.BLOCK_NOTE_BELL, 1, 1f);
 		}).render.getTooltip().func((Function<GuiComponent, java.util.List<String>>) t -> {
 			List<String> txt = new ArrayList<>();
-			txt.add("If enabled, the left click block event will be cancelled to the viewers (your audience)");
+			txt.add("Change your audience's gamemode when they enter the plot");
 			return txt;
 		});
 
@@ -183,7 +187,7 @@ public class GuiPlot extends GuiBase {
 			Minecraft.getMinecraft().player.playSound(SoundEvents.BLOCK_NOTE_BELL, 1, hasPerm ? 2f : 1f);
 		}).render.getTooltip().func((Function<GuiComponent, java.util.List<String>>) t -> {
 			List<String> txt = new ArrayList<>();
-			txt.add("If enabled, the left click block event will be cancelled to the viewers (your audience)");
+			txt.add("If enabled, your audience will not be able to fly");
 			return txt;
 		});
 

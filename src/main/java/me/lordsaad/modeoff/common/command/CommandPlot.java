@@ -7,12 +7,12 @@ import me.lordsaad.modeoff.api.plot.PlotRegistry;
 import me.lordsaad.modeoff.api.rank.RankRegistry;
 import me.lordsaad.modeoff.common.CommonProxy;
 import me.lordsaad.modeoff.common.network.PacketOpenGuiPlot;
+import me.lordsaad.modeoff.common.network.PacketSyncPlots;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextFormatting;
@@ -34,7 +34,7 @@ public class CommandPlot extends CommandBase {
 	@NotNull
 	@Override
 	public String getUsage(@NotNull ICommandSender sender) {
-		return "/plot <register <mod name> / tp [plotID/player] / add <team member>>";
+		return "/plot <register <mod name> / tp [plotID/player] / manage [plot name] / rename>";
 	}
 
 	@Override
@@ -69,9 +69,30 @@ public class CommandPlot extends CommandBase {
 						return;
 					}
 
-					Plot plot = PlotRegistry.INSTANCE.getPlot(getCommandSenderAsPlayer(sender).getUniqueID());
+					if (args.length > 1) {
+						for (Plot plot : PlotRegistry.INSTANCE.plots) {
+							if (plot.getModName().equals(args[1].toLowerCase(Locale.ROOT))) {
+
+								if (!RankRegistry.INSTANCE.hasPermission(getCommandSenderAsPlayer(sender), PermissionRegistry.DefaultPermissions.PERMISSION_PLOT_ADMIN)
+										&& !plot.getOwners().contains(getCommandSenderAsPlayer(sender).getUniqueID())) {
+									sender.sendMessage(new TextComponentString(TextFormatting.RED + "You are not an owner of that plot."));
+									return;
+								}
+
+								PlotRegistry.INSTANCE.deletePlot(plot);
+								PacketHandler.NETWORK.sendToAll(new PacketSyncPlots(PlotRegistry.INSTANCE.plots));
+								sender.sendMessage(new TextComponentString(TextFormatting.GREEN + "Plot deleted successfully."));
+
+								return;
+							}
+						}
+					}
+					EntityPlayer player = getCommandSenderAsPlayer(sender);
+					Plot plot = PlotRegistry.INSTANCE.getPlot(player.getUniqueID());
 					if (plot != null) {
+
 						PlotRegistry.INSTANCE.deletePlot(plot);
+						PacketHandler.NETWORK.sendToAll(new PacketSyncPlots(PlotRegistry.INSTANCE.plots));
 						sender.sendMessage(new TextComponentString(TextFormatting.GREEN + "Plot deleted successfully."));
 
 					} else {
@@ -103,6 +124,7 @@ public class CommandPlot extends CommandBase {
 
 						plot.setModName(newModName);
 						PlotRegistry.INSTANCE.savePlot(plot.getID());
+						PacketHandler.NETWORK.sendToAll(new PacketSyncPlots(PlotRegistry.INSTANCE.plots));
 
 					} else {
 						sender.sendMessage(new TextComponentString(TextFormatting.RED + "Plot does not exist. " + TextFormatting.GRAY + "You do not have a registered plot."));
@@ -116,14 +138,29 @@ public class CommandPlot extends CommandBase {
 						return;
 					}
 
+					if (args.length > 1) {
+						for (Plot plot : PlotRegistry.INSTANCE.plots) {
+							if (plot.getModName().equals(args[1].toLowerCase(Locale.ROOT))) {
+
+								if (!RankRegistry.INSTANCE.hasPermission(getCommandSenderAsPlayer(sender), PermissionRegistry.DefaultPermissions.PERMISSION_PLOT_ADMIN)
+										&& !plot.getOwners().contains(getCommandSenderAsPlayer(sender).getUniqueID())) {
+									sender.sendMessage(new TextComponentString(TextFormatting.RED + "You are not an owner of that plot."));
+									return;
+								}
+
+								PacketHandler.NETWORK.sendTo(new PacketOpenGuiPlot(plot.getID()), getCommandSenderAsPlayer(sender));
+								return;
+							}
+						}
+					}
 					EntityPlayer player = getCommandSenderAsPlayer(sender);
 					Plot plot = PlotRegistry.INSTANCE.getPlot(player.getUniqueID());
 					if (plot != null) {
 
-						PacketHandler.NETWORK.sendTo(new PacketOpenGuiPlot(), (EntityPlayerMP) player);
+						PacketHandler.NETWORK.sendTo(new PacketOpenGuiPlot(), getCommandSenderAsPlayer(sender));
 
 					} else {
-						sender.sendMessage(new TextComponentString(TextFormatting.RED + "Plot does not exist. " + TextFormatting.GRAY + "You do not have a registered plot."));
+						sender.sendMessage(new TextComponentString(TextFormatting.RED + "You do not have a registered plot."));
 					}
 					return;
 				}
@@ -214,6 +251,8 @@ public class CommandPlot extends CommandBase {
 						}
 
 						Plot plot = PlotRegistry.INSTANCE.registerPlot(new Plot(modName, owners));
+
+						PacketHandler.NETWORK.sendToAll(new PacketSyncPlots(PlotRegistry.INSTANCE.plots));
 
 						plot.teleport(player);
 

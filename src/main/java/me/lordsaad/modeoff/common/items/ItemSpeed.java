@@ -66,7 +66,6 @@ public class ItemSpeed extends ItemMod {
 		if (playerIn instanceof EntityPlayerMP) {
 
 			PlayerCapabilities capabilities = playerIn.capabilities;
-			capabilities.setFlySpeed(0.05f * (level + 1));
 
 			capabilities.allowFlying = true;
 			capabilities.allowEdit = false;
@@ -81,7 +80,10 @@ public class ItemSpeed extends ItemMod {
 				}
 			}
 
-			((EntityPlayerMP) playerIn).connection.sendPacket(new SPacketPlayerAbilities(capabilities));
+			SPacketPlayerAbilities packet = new SPacketPlayerAbilities(capabilities);
+			packet.setFlySpeed(0.05f * (level + 1));
+
+			((EntityPlayerMP) playerIn).connection.sendPacket(packet);
 
 			if (level == 0) playerIn.removePotionEffect(MobEffects.SPEED);
 			else playerIn.addPotionEffect(new PotionEffect(MobEffects.SPEED, 999999, level * 10, true, false));

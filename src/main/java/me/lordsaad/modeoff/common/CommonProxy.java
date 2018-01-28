@@ -6,7 +6,6 @@ import me.lordsaad.modeoff.ModeratorOff;
 import me.lordsaad.modeoff.api.capability.ModoffCapabilityProvider;
 import me.lordsaad.modeoff.api.plot.PlotRegistry;
 import me.lordsaad.modeoff.api.rank.RankRegistry;
-import me.lordsaad.modeoff.client.core.HudEventHandler;
 import me.lordsaad.modeoff.client.gui.GuiHandler;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
@@ -39,7 +38,6 @@ public class CommonProxy {
 
 		MinecraftForge.EVENT_BUS.register(new EventHandler());
 		MinecraftForge.EVENT_BUS.register(RankRegistry.INSTANCE);
-		MinecraftForge.EVENT_BUS.register(new HudEventHandler());
 
 		File configFolder = new File(event.getModConfigurationDirectory(), "/plots/");
 

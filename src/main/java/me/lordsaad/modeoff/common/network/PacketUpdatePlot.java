@@ -2,6 +2,7 @@ package me.lordsaad.modeoff.common.network;
 
 import com.teamwizardry.librarianlib.features.autoregister.PacketRegister;
 import com.teamwizardry.librarianlib.features.network.PacketBase;
+import com.teamwizardry.librarianlib.features.network.PacketHandler;
 import com.teamwizardry.librarianlib.features.saving.SaveMethodGetter;
 import com.teamwizardry.librarianlib.features.saving.SaveMethodSetter;
 import me.lordsaad.modeoff.api.plot.Plot;
@@ -9,8 +10,6 @@ import me.lordsaad.modeoff.api.plot.PlotRegistry;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 import net.minecraftforge.fml.relauncher.Side;
-
-import java.util.Objects;
 
 /**
  * Created by LordSaad.
@@ -43,7 +42,13 @@ public class PacketUpdatePlot extends PacketBase {
 	@Override
 	public void handle(MessageContext messageContext) {
 		if (plot == null) return;
-		Objects.requireNonNull(PlotRegistry.INSTANCE.getPlot(plot.getID())).deserializeNBT(plot.serializeNBT());
+		Plot plot = PlotRegistry.INSTANCE.getPlot(this.plot.getID());
+
+		if (plot == null) return;
+		plot.deserializeNBT(plot.serializeNBT());
+
 		PlotRegistry.INSTANCE.savePlot(plot.getID());
+
+		PacketHandler.NETWORK.sendToAll(new PacketSyncPlots(PlotRegistry.INSTANCE.plots));
 	}
 }

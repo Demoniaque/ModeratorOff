@@ -8,18 +8,19 @@ import me.lordsaad.modeoff.api.plot.Plot;
 import me.lordsaad.modeoff.api.plot.PlotRegistry;
 import me.lordsaad.modeoff.api.rank.IRank;
 import me.lordsaad.modeoff.api.rank.RankRegistry;
-import net.minecraft.client.entity.EntityPlayerSP;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.player.PlayerCapabilities;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.play.server.SPacketPlayerAbilities;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.GameType;
+import net.minecraft.world.Teleporter;
+import net.minecraft.world.WorldServer;
+import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.event.ServerChatEvent;
-import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.item.ItemTossEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
@@ -35,11 +36,11 @@ import net.minecraftforge.fml.relauncher.Side;
 public class EventHandler {
 
 	@SubscribeEvent
-	public void joinWorld(EntityJoinWorldEvent event) {
-		Entity entity = event.getEntity();
-		if (entity instanceof EntityPlayerSP) {
-			EntityPlayer player = (EntityPlayer) entity;
+	public void joinWorld(net.minecraftforge.fml.common.gameevent.PlayerEvent.PlayerLoggedInEvent event) {
+		EntityPlayer player = event.player;
 
+		// Send log in message
+		{
 			player.sendMessage(new TextComponentString(
 					TextFormatting.GRAY + "<<==============[ " + TextFormatting.GOLD + "ModOff" + TextFormatting.GRAY + " ]==============>>"));
 			player.sendMessage(new TextComponentString(" "));
@@ -60,11 +61,33 @@ public class EventHandler {
 			player.sendMessage(new TextComponentString(" "));
 			player.sendMessage(new TextComponentString(
 					TextFormatting.GRAY + "<<====================================>>"));
-		} else if (entity instanceof EntityPlayerMP) {
-			EntityPlayer player = (EntityPlayer) entity;
+		}
 
-			player.setPositionAndUpdate(22.5, 100, 9.5);
+		// Change position and world to spawn
+		{
+			if (!(player instanceof EntityPlayerMP)) return;
+			MinecraftServer server = player.world.getMinecraftServer();
+			WorldServer worldServer = DimensionManager.getWorld(0);
 
+			if (server == null) return;
+
+			double x = 22.5, y = 100, z = 9.5;
+
+			if (player.world.provider.getDimension() != 0) {
+				server.getPlayerList().transferPlayerToDimension((EntityPlayerMP) player, 0, new Teleporter(worldServer));
+				player.setPositionAndUpdate(x, y, z);
+				worldServer.spawnEntity(player);
+				worldServer.updateEntityWithOptionalForce(player, false);
+			} else {
+				player.setPosition(x, y, z);
+				((EntityPlayerMP) player).connection.setPlayerLocation(x, y, z, 0, 0);
+			}
+
+			player.setWorld(server.getWorld(0));
+		}
+
+		// Give items
+		{
 			ItemStack speed = new ItemStack(ModItems.SPEED);
 			if (!player.inventory.hasItemStack(speed)) {
 				if (!player.addItemStackToInventory(speed)) {
@@ -114,16 +137,19 @@ public class EventHandler {
 	public void leftClickBlock(PlayerInteractEvent.LeftClickBlock event) {
 		Plot plot = PlotRegistry.INSTANCE.findPlot(event.getPos());
 
+		boolean isAdmin = RankRegistry.INSTANCE.hasPermission(event.getEntityPlayer(), PermissionRegistry.DefaultPermissions.PERMISSION_PLOT_ADMIN);
+
 		if (plot != null) {
-			if (!RankRegistry.INSTANCE.hasPermission(event.getEntityPlayer(), PermissionRegistry.DefaultPermissions.PERMISSION_PLOT_ADMIN)
-					&& ((!plot.hasPermission(PermissionRegistry.DefaultPermissions.PERMISSION_ENABLE_BLOCK_BREAKING)
-					&& !plot.getOwners().contains(event.getEntityPlayer().getUniqueID()))
-					|| plot.hasPermission(PermissionRegistry.DefaultPermissions.PERMISSION_LOCK_PLOT))) {
+			boolean enableBlockBreaking = plot.hasPermission(PermissionRegistry.DefaultPermissions.PERMISSION_ENABLE_BLOCK_BREAKING);
+			boolean plotLocked = plot.hasPermission(PermissionRegistry.DefaultPermissions.PERMISSION_LOCK_PLOT);
+			boolean isOwner = plot.isOwner(event.getEntityPlayer());
+
+			if (!isAdmin && (plotLocked || (!enableBlockBreaking && !isOwner))) {
 				event.setUseItem(Event.Result.DENY);
 				event.setUseBlock(Event.Result.DENY);
 				event.setCanceled(true);
 			}
-		} else if (!RankRegistry.INSTANCE.hasPermission(event.getEntityPlayer(), PermissionRegistry.DefaultPermissions.PERMISSION_PLOT_ADMIN)) {
+		} else if (!isAdmin) {
 			event.setUseItem(Event.Result.DENY);
 			event.setUseBlock(Event.Result.DENY);
 			event.setCanceled(true);
@@ -134,14 +160,17 @@ public class EventHandler {
 	public void onBreakBlock(BlockEvent.BreakEvent event) {
 		Plot plot = PlotRegistry.INSTANCE.findPlot(event.getPos());
 
+		boolean isAdmin = RankRegistry.INSTANCE.hasPermission(event.getPlayer(), PermissionRegistry.DefaultPermissions.PERMISSION_PLOT_ADMIN);
+
 		if (plot != null) {
-			if (!RankRegistry.INSTANCE.hasPermission(event.getPlayer(), PermissionRegistry.DefaultPermissions.PERMISSION_PLOT_ADMIN)
-					&& ((!plot.hasPermission(PermissionRegistry.DefaultPermissions.PERMISSION_ENABLE_BLOCK_BREAKING)
-					&& !plot.getOwners().contains(event.getPlayer().getUniqueID()))
-					|| plot.hasPermission(PermissionRegistry.DefaultPermissions.PERMISSION_LOCK_PLOT))) {
+			boolean enableBlockBreaking = plot.hasPermission(PermissionRegistry.DefaultPermissions.PERMISSION_ENABLE_BLOCK_BREAKING);
+			boolean plotLocked = plot.hasPermission(PermissionRegistry.DefaultPermissions.PERMISSION_LOCK_PLOT);
+			boolean isOwner = plot.isOwner(event.getPlayer());
+
+			if (!isAdmin && (plotLocked || (!enableBlockBreaking && !isOwner))) {
 				event.setCanceled(true);
 			}
-		} else if (!RankRegistry.INSTANCE.hasPermission(event.getPlayer(), PermissionRegistry.DefaultPermissions.PERMISSION_PLOT_ADMIN)) {
+		} else if (!isAdmin) {
 			event.setCanceled(true);
 		}
 	}
@@ -150,14 +179,17 @@ public class EventHandler {
 	public void breakSpeed(PlayerEvent.BreakSpeed event) {
 		Plot plot = PlotRegistry.INSTANCE.findPlot(event.getPos());
 
+		boolean isAdmin = RankRegistry.INSTANCE.hasPermission(event.getEntityPlayer(), PermissionRegistry.DefaultPermissions.PERMISSION_PLOT_ADMIN);
+
 		if (plot != null) {
-			if (!RankRegistry.INSTANCE.hasPermission(event.getEntityPlayer(), PermissionRegistry.DefaultPermissions.PERMISSION_PLOT_ADMIN)
-					&& ((!plot.hasPermission(PermissionRegistry.DefaultPermissions.PERMISSION_ENABLE_BLOCK_BREAKING)
-					&& !plot.getOwners().contains(event.getEntityPlayer().getUniqueID()))
-					|| plot.hasPermission(PermissionRegistry.DefaultPermissions.PERMISSION_LOCK_PLOT))) {
+			boolean enableBlockBreaking = plot.hasPermission(PermissionRegistry.DefaultPermissions.PERMISSION_ENABLE_BLOCK_BREAKING);
+			boolean plotLocked = plot.hasPermission(PermissionRegistry.DefaultPermissions.PERMISSION_LOCK_PLOT);
+			boolean isOwner = plot.isOwner(event.getEntityPlayer());
+
+			if (!isAdmin && (plotLocked || (!enableBlockBreaking && !isOwner))) {
 				event.setCanceled(true);
 			}
-		} else if (!RankRegistry.INSTANCE.hasPermission(event.getEntityPlayer(), PermissionRegistry.DefaultPermissions.PERMISSION_PLOT_ADMIN)) {
+		} else if (!isAdmin) {
 			event.setCanceled(true);
 		}
 	}
@@ -166,14 +198,17 @@ public class EventHandler {
 	public void place(BlockEvent.PlaceEvent event) {
 		Plot plot = PlotRegistry.INSTANCE.findPlot(event.getPos());
 
+		boolean isAdmin = RankRegistry.INSTANCE.hasPermission(event.getPlayer(), PermissionRegistry.DefaultPermissions.PERMISSION_PLOT_ADMIN);
+
 		if (plot != null) {
-			if (!RankRegistry.INSTANCE.hasPermission(event.getPlayer(), PermissionRegistry.DefaultPermissions.PERMISSION_PLOT_ADMIN)
-					&& ((!plot.hasPermission(PermissionRegistry.DefaultPermissions.PERMISSION_ENABLE_BLOCK_PLACING)
-					&& !plot.getOwners().contains(event.getPlayer().getUniqueID()))
-					|| plot.hasPermission(PermissionRegistry.DefaultPermissions.PERMISSION_LOCK_PLOT))) {
+			boolean enableBlockPlacing = plot.hasPermission(PermissionRegistry.DefaultPermissions.PERMISSION_ENABLE_BLOCK_PLACING);
+			boolean plotLocked = plot.hasPermission(PermissionRegistry.DefaultPermissions.PERMISSION_LOCK_PLOT);
+			boolean isOwner = plot.isOwner(event.getPlayer());
+
+			if (!isAdmin && (plotLocked || (!enableBlockPlacing && !isOwner))) {
 				event.setCanceled(true);
 			}
-		} else if (!RankRegistry.INSTANCE.hasPermission(event.getPlayer(), PermissionRegistry.DefaultPermissions.PERMISSION_PLOT_ADMIN)) {
+		} else if (!isAdmin) {
 			event.setCanceled(true);
 		}
 	}
@@ -184,7 +219,6 @@ public class EventHandler {
 
 			//event.player.addPotionEffect(new PotionEffect(MobEffects.JUMP_BOOST, 999, 1, true, false));
 			event.player.setHealth(20f);
-			event.player.getFoodStats().setFoodSaturationLevel(20f);
 			event.player.getFoodStats().setFoodLevel(20);
 			event.player.fallDistance = 0;
 
@@ -196,16 +230,16 @@ public class EventHandler {
 					if (curPlot != null) {
 						curPlot.onLeave(event.player);
 
-						boolean isPlotAdmin = RankRegistry.INSTANCE.hasPermission(event.player, PermissionRegistry.DefaultPermissions.PERMISSION_PLOT_ADMIN);
+						boolean isAdmin = RankRegistry.INSTANCE.hasPermission(event.player, PermissionRegistry.DefaultPermissions.PERMISSION_PLOT_ADMIN);
 
-						if (isPlotAdmin) event.player.setGameType(GameType.CREATIVE);
+						if (isAdmin) event.player.setGameType(GameType.CREATIVE);
 						else event.player.setGameType(GameType.ADVENTURE);
 
 						if (event.player instanceof EntityPlayerMP) {
-							PlayerCapabilities capabilities = new PlayerCapabilities();
+							PlayerCapabilities capabilities = event.player.capabilities;
 
 							capabilities.allowFlying = true;
-							capabilities.allowEdit = isPlotAdmin;
+							capabilities.allowEdit = isAdmin;
 							capabilities.isFlying = event.player.capabilities.isFlying;
 
 							((EntityPlayerMP) event.player).connection.sendPacket(new SPacketPlayerAbilities(capabilities));
@@ -215,8 +249,9 @@ public class EventHandler {
 					if (plot != null) {
 						plot.onEnter(event.player);
 
-						boolean isPlotAdmin = RankRegistry.INSTANCE.hasPermission(event.player, PermissionRegistry.DefaultPermissions.PERMISSION_PLOT_ADMIN);
-						if (!plot.isOwner(event.player) && !isPlotAdmin) {
+						boolean isAdmin = RankRegistry.INSTANCE.hasPermission(event.player, PermissionRegistry.DefaultPermissions.PERMISSION_PLOT_ADMIN);
+
+						if (!plot.isOwner(event.player)) {
 							if (plot.hasPermission(PermissionRegistry.DefaultPermissions.PERMISSION_GAMEMODE_CREATIVE)) {
 								event.player.setGameType(GameType.CREATIVE);
 							} else if (plot.hasPermission(PermissionRegistry.DefaultPermissions.PERMISSION_GAMEMODE_SPECTATOR)) {
@@ -227,23 +262,21 @@ public class EventHandler {
 								event.player.setGameType(GameType.ADVENTURE);
 							}
 
-							if (event.player instanceof EntityPlayerMP) {
-								PlayerCapabilities capabilities = new PlayerCapabilities();
+							if (!isAdmin && event.player instanceof EntityPlayerMP) {
+								PlayerCapabilities capabilities = event.player.capabilities;
 
 								capabilities.allowFlying = !plot.hasPermission(PermissionRegistry.DefaultPermissions.PERMISSION_DISABLE_FLIGHT);
-								capabilities.allowEdit =
-										plot.hasPermission(PermissionRegistry.DefaultPermissions.PERMISSION_ENABLE_BLOCK_BREAKING)
-												|| !plot.hasPermission(PermissionRegistry.DefaultPermissions.PERMISSION_LOCK_PLOT);
+								capabilities.allowEdit = !plot.hasPermission(PermissionRegistry.DefaultPermissions.PERMISSION_LOCK_PLOT);
 
 								((EntityPlayerMP) event.player).connection.sendPacket(new SPacketPlayerAbilities(capabilities));
 							}
 						} else {
 							event.player.setGameType(GameType.CREATIVE);
 							if (event.player instanceof EntityPlayerMP) {
-								PlayerCapabilities capabilities = new PlayerCapabilities();
+								PlayerCapabilities capabilities = event.player.capabilities;
 
 								capabilities.allowFlying = true;
-								capabilities.allowEdit = isPlotAdmin || !plot.hasPermission(PermissionRegistry.DefaultPermissions.PERMISSION_LOCK_PLOT);
+								capabilities.allowEdit = isAdmin || !plot.hasPermission(PermissionRegistry.DefaultPermissions.PERMISSION_LOCK_PLOT);
 
 								((EntityPlayerMP) event.player).connection.sendPacket(new SPacketPlayerAbilities(capabilities));
 							}

@@ -8,16 +8,15 @@ import me.lordsaad.modeoff.api.rank.RankRegistry;
 import me.lordsaad.modeoff.common.CommonProxy;
 import me.lordsaad.modeoff.common.network.PacketOpenGuiPlot;
 import me.lordsaad.modeoff.common.network.PacketSyncPlots;
-import net.minecraft.command.CommandBase;
-import net.minecraft.command.CommandException;
-import net.minecraft.command.ICommandSender;
-import net.minecraft.command.WrongUsageException;
+import net.minecraft.command.*;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextFormatting;
 import org.jetbrains.annotations.NotNull;
 
+import javax.annotation.Nullable;
 import java.util.*;
 
 /**
@@ -34,7 +33,40 @@ public class CommandPlot extends CommandBase {
 	@NotNull
 	@Override
 	public String getUsage(@NotNull ICommandSender sender) {
-		return "/plot <register <mod name> / tp [plotID/player] / manage [plot name] / rename>";
+		return "/plot <register <mod name> / tp [plotID/player] / manage [plot name] / rename [new name]>";
+	}
+
+	@Override
+	public int getRequiredPermissionLevel() {
+		return 0;
+	}
+
+	@Override
+	public boolean checkPermission(MinecraftServer server, ICommandSender sender) {
+		try {
+			if (RankRegistry.INSTANCE.getRank(getCommandSenderAsPlayer(sender)).hasPermission(PermissionRegistry.DefaultPermissions.PERMISSION_PLOT_REGISTER)) {
+				return true;
+			}
+		} catch (PlayerNotFoundException e) {
+			return false;
+		}
+		return false;
+	}
+
+	@NotNull
+	@Override
+	public List<String> getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos targetPos) {
+		if (args.length == 1) {
+			return getListOfStringsMatchingLastWord(args, "register", "tp", "manage", "rename");
+		} else {
+			if (args.length == 2) {
+				if ("tp".equals(args[0])) {
+					return getListOfStringsMatchingLastWord(args, server.getPlayerList().getWhitelistedPlayerNames());
+				}
+			}
+
+			return Collections.emptyList();
+		}
 	}
 
 	@Override

@@ -39,7 +39,7 @@ public class HudEventHandler extends Gui {
 		if (plot != null) {
 			int right = ((width / 2) - (100 / 2)) + 145;
 			int top = height - 17;
-			int paneWidth = 100, paneHeight;
+			int paneWidth = 120, paneHeight;
 			int r = 0, g = 0, b = 0, a = 100;
 
 			Set<UUID> authors = plot.getOwners();

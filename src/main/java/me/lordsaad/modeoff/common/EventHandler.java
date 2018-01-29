@@ -14,8 +14,10 @@ import net.minecraft.entity.player.PlayerCapabilities;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.play.server.SPacketPlayerAbilities;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.text.Style;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.text.event.ClickEvent;
 import net.minecraft.world.GameType;
 import net.minecraft.world.Teleporter;
 import net.minecraft.world.WorldServer;
@@ -59,6 +61,10 @@ public class EventHandler {
 			}
 
 			player.sendMessage(new TextComponentString(" "));
+
+			player.sendMessage(new TextComponentString(TextFormatting.AQUA + "Click here to join the discord").setStyle(new Style().setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://discord.gg/tu8BpwH"))));
+			player.sendMessage(new TextComponentString(" "));
+
 			player.sendMessage(new TextComponentString(
 					TextFormatting.GRAY + "<<====================================>>"));
 		}
@@ -100,6 +106,24 @@ public class EventHandler {
 				if (!player.addItemStackToInventory(teleport)) {
 					player.inventory.setInventorySlotContents(1, teleport);
 				}
+			}
+		}
+
+		// Set capabilities
+		{
+			boolean isAdmin = RankRegistry.INSTANCE.hasPermission(event.player, PermissionRegistry.DefaultPermissions.PERMISSION_PLOT_ADMIN);
+
+			if (isAdmin) event.player.setGameType(GameType.CREATIVE);
+			else event.player.setGameType(GameType.ADVENTURE);
+
+			if (event.player instanceof EntityPlayerMP) {
+				PlayerCapabilities capabilities = event.player.capabilities;
+
+				capabilities.allowFlying = true;
+				capabilities.allowEdit = isAdmin;
+				capabilities.isFlying = false;
+
+				((EntityPlayerMP) event.player).connection.sendPacket(new SPacketPlayerAbilities(capabilities));
 			}
 		}
 	}
@@ -207,9 +231,11 @@ public class EventHandler {
 
 			if (!isAdmin && (plotLocked || (!enableBlockPlacing && !isOwner))) {
 				event.setCanceled(true);
+				event.getPlayer().sendMessage(new TextComponentString("You are not an admin and the event was cancelled. (2)"));
 			}
 		} else if (!isAdmin) {
 			event.setCanceled(true);
+			event.getPlayer().sendMessage(new TextComponentString("You are not an admin and the event was cancelled. (1)"));
 		}
 	}
 

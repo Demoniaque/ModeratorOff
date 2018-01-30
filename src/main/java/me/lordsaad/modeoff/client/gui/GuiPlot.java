@@ -17,30 +17,18 @@ import me.lordsaad.modeoff.api.plot.PlotRegistry;
 import me.lordsaad.modeoff.common.network.PacketUpdatePlot;
 import net.minecraft.client.Minecraft;
 import net.minecraft.init.SoundEvents;
-import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
 
 import java.awt.*;
 import java.util.ArrayList;
-import java.util.EnumMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.function.Function;
 
 public class GuiPlot extends GuiBase {
 
-	static final Sprite LOCKED = new Sprite(new ResourceLocation(ModeratorOff.MOD_ID, "textures/gui/locked.png"));
-	static final Sprite UNLOCKED = new Sprite(new ResourceLocation(ModeratorOff.MOD_ID, "textures/gui/unlocked.png"));
-	static final Sprite CHECKBOX_CHECKED = new Sprite(new ResourceLocation(ModeratorOff.MOD_ID, "textures/gui/checkbox_checked.png"));
-	static final Sprite CHECKBOX_XED = new Sprite(new ResourceLocation(ModeratorOff.MOD_ID, "textures/gui/checkbox_xed.png"));
-	static final Sprite CHECKBOX_RADIO = new Sprite(new ResourceLocation(ModeratorOff.MOD_ID, "textures/gui/checkbox_radio.png"));
-	private static String tag;
-	//private EnumMap<BlockRenderLayer, HashMultimap<Icacher.blockstate, BlockPos>> cacher.blocks = new EnumMap<>(BlockRenderLayer.class);
-	private HashSet<BlockPos> tempPosCache = new HashSet<>();
-	private EnumMap<BlockRenderLayer, int[]> vboCaches = new EnumMap<>(BlockRenderLayer.class);
-
-	private int tick;
+	private static final Sprite CHECKBOX_CHECKED = new Sprite(new ResourceLocation(ModeratorOff.MOD_ID, "textures/gui/checkbox_checked.png"));
+	private static final Sprite CHECKBOX_XED = new Sprite(new ResourceLocation(ModeratorOff.MOD_ID, "textures/gui/checkbox_xed.png"));
+	private static final Sprite CHECKBOX_RADIO = new Sprite(new ResourceLocation(ModeratorOff.MOD_ID, "textures/gui/checkbox_radio.png"));
 
 	public GuiPlot(int plotID) {
 		super(400, 400);
@@ -194,82 +182,5 @@ public class GuiPlot extends GuiBase {
 			txt.add("Change your audience's gamemode when they enter the plot");
 			return txt;
 		});
-
-		/*{
-			PlotDimensions dimensions = plot.getDimensions();
-			BlockPos plotPos = new BlockPos(plot.getPlotPos().getXi(), ConfigValues.y, plot.getPlotPos().getYi());
-			BlockPos min = dimensions.getCorner1();
-			BlockPos max = dimensions.getCorner2();
-
-			ChunkCache blockAccess = new PlotChunkCache(Minecraft.getMinecraft().world, min.subtract(new Vec3i(3, 3, 3)), max.add(3, 3, 3), 0);
-
-			PlotCacher cacher = new PlotCacher(blockAccess, plot);
-
-			for (BlockRenderLayer layer : cacher.blocks.keySet()) {
-				Tessellator tes = Tessellator.getInstance();
-				BufferBuilder buffer0 = tes.getBuffer();
-				BlockRendererDispatcher dispatcher = Minecraft.getMinecraft().getBlockRendererDispatcher();
-
-				if (vboCaches.get(layer) == null) {
-
-					buffer0.begin(GL11.GL_QUADS, DefaultVertexFormats.BLOCK);
-
-					for (IBlockState state : cacher.blocks.get(layer).keySet()) {
-						for (BlockPos pos : cacher.blocks.get(layer).get(state)) {
-							BlockPos origin = pos.subtract(plotPos);
-							buffer0.setTranslation(-pos.getX() + origin.getX(), -pos.getY() + origin.getY(), -pos.getZ() + origin.getZ());
-							dispatcher.renderBlock(state, pos, blockAccess, buffer0);
-							buffer0.setTranslation(0, 0, 0);
-						}
-					}
-
-					vboCaches.put(layer, ClientUtilMethods.createCacheArrayAndReset(buffer0));
-				}
-			}
-
-			// RENDER IT
-
-			ComponentVoid sideView = new ComponentVoid(0, getGuiHeight() - 200, getGuiWidth(), 200);
-			getMainComponents().add(sideView);
-
-			ScissorMixin.INSTANCE.scissor(sideView);
-
-			sideView.BUS.hook(GuiComponentEvents.PostDrawEvent.class, (event) -> {
-
-				if (tick > 360) tick = 0;
-				else tick++;
-
-				int horizontalAngle = 25;
-				int verticalAngle = 45;
-
-				GlStateManager.pushMatrix();
-				GlStateManager.enableCull();
-
-				GlStateManager.matrixMode(GL11.GL_MODELVIEW);
-				GlStateManager.shadeModel(GL11.GL_SMOOTH);
-				GlStateManager.translate(
-						(sideView.getSize().getX() / 2.0) - ((ConfigValues.plotSize) * 0.8 / 2.0),
-						(sideView.getSize().getY() / 2.0) - ((ConfigValues.plotSize) * 0.8 / 2.0),
-						500);
-				GlStateManager.rotate(horizontalAngle, -1, 0, 0);
-				GlStateManager.rotate((float) (tick), 0, 1, 0);
-				GlStateManager.scale(4, -4, 4);
-				GlStateManager.translate(0.5, 0.5, 0.5);
-
-				mc.renderEngine.bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
-				for (BlockRenderLayer layer : cacher.blocks.keySet()) {
-					Tessellator tes = Tessellator.getInstance();
-					BufferBuilder buffer1 = tes.getBuffer();
-
-					buffer1.begin(GL11.GL_QUADS, DefaultVertexFormats.BLOCK);
-					buffer1.addVertexData(vboCaches.get(layer));
-					tes.draw();
-				}
-
-				GlStateManager.disableCull();
-				GlStateManager.popMatrix();
-			});
-		}*/
-		// SIDE VIEW //
 	}
 }

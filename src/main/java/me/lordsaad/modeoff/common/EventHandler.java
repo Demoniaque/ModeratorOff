@@ -41,6 +41,8 @@ public class EventHandler {
 	public void joinWorld(net.minecraftforge.fml.common.gameevent.PlayerEvent.PlayerLoggedInEvent event) {
 		EntityPlayer player = event.player;
 
+		PlotRegistry.INSTANCE.loadPlots();
+
 		// Send log in message
 		{
 			player.sendMessage(new TextComponentString(
@@ -131,6 +133,23 @@ public class EventHandler {
 	@SubscribeEvent
 	public void respawn(net.minecraftforge.fml.common.gameevent.PlayerEvent.PlayerRespawnEvent event) {
 		event.player.setPositionAndUpdate(22.5, 100, 9.5);
+
+		// Give items
+		{
+			ItemStack speed = new ItemStack(ModItems.SPEED);
+			if (!event.player.inventory.hasItemStack(speed)) {
+				if (!event.player.addItemStackToInventory(speed)) {
+					event.player.inventory.setInventorySlotContents(0, speed);
+				}
+			}
+
+			ItemStack teleport = new ItemStack(ModItems.TELEPORT);
+			if (!event.player.inventory.hasItemStack(teleport)) {
+				if (!event.player.addItemStackToInventory(teleport)) {
+					event.player.inventory.setInventorySlotContents(1, teleport);
+				}
+			}
+		}
 	}
 
 	@SubscribeEvent
@@ -231,11 +250,9 @@ public class EventHandler {
 
 			if (!isAdmin && (plotLocked || (!enableBlockPlacing && !isOwner))) {
 				event.setCanceled(true);
-				event.getPlayer().sendMessage(new TextComponentString("You are not an admin and the event was cancelled. (2)"));
 			}
 		} else if (!isAdmin) {
 			event.setCanceled(true);
-			event.getPlayer().sendMessage(new TextComponentString("You are not an admin and the event was cancelled. (1)"));
 		}
 	}
 

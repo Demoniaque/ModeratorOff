@@ -120,6 +120,26 @@ public class GuiPlot extends GuiBase {
 			return txt;
 		});
 
+		Permission flightPerm = PermissionRegistry.DefaultPermissions.PERMISSION_DISABLE_FLIGHT;
+		new ComponentButton(20, 20 + (++id * 20) + (id * buffer), compRect, "Disable Flight", plot.hasPermission(flightPerm) ? CHECKBOX_CHECKED : CHECKBOX_XED, (componentSprite, componentText) -> {
+			boolean hasPerm = plot.hasPermission(flightPerm);
+
+			if (hasPerm) {
+				plot.removePermission(flightPerm);
+				componentSprite.setSprite(CHECKBOX_XED);
+			} else {
+				plot.addPermission(flightPerm);
+				componentSprite.setSprite(CHECKBOX_CHECKED);
+			}
+
+			PacketHandler.NETWORK.sendToServer(new PacketUpdatePlot(plot));
+			Minecraft.getMinecraft().player.playSound(SoundEvents.BLOCK_NOTE_BELL, 1, hasPerm ? 2f : 1f);
+		}).render.getTooltip().func((Function<GuiComponent, java.util.List<String>>) t -> {
+			List<String> txt = new ArrayList<>();
+			txt.add("If enabled, your audience will not be able to fly");
+			return txt;
+		});
+
 		PermissionGamemode gamemodePerm = PermissionRegistry.DefaultPermissions.PERMISSION_GAMEMODE_ADVENTURE;
 		for (Permission permission : plot.getPermissions()) {
 			if (permission instanceof PermissionGamemode) {
@@ -155,10 +175,14 @@ public class GuiPlot extends GuiBase {
 				plot.addPermission(PermissionRegistry.DefaultPermissions.PERMISSION_GAMEMODE_SPECTATOR);
 				newName = "Spectator";
 
-			} else {
+			} else if (plot.hasPermission(PermissionRegistry.DefaultPermissions.PERMISSION_GAMEMODE_SPECTATOR)) {
 				plot.removePermission(PermissionRegistry.DefaultPermissions.PERMISSION_GAMEMODE_SPECTATOR);
 				plot.addPermission(PermissionRegistry.DefaultPermissions.PERMISSION_GAMEMODE_ADVENTURE);
 				newName = "Adventure";
+			} else {
+				plot.removePermission(PermissionRegistry.DefaultPermissions.PERMISSION_GAMEMODE_ADVENTURE);
+				plot.addPermission(PermissionRegistry.DefaultPermissions.PERMISSION_GAMEMODE_CREATIVE);
+				newName = "Creative";
 			}
 
 			componentText.getText().setValue("Gamemode " + newName);
@@ -168,26 +192,6 @@ public class GuiPlot extends GuiBase {
 		}).render.getTooltip().func((Function<GuiComponent, java.util.List<String>>) t -> {
 			List<String> txt = new ArrayList<>();
 			txt.add("Change your audience's gamemode when they enter the plot");
-			return txt;
-		});
-
-		Permission flightPerm = PermissionRegistry.DefaultPermissions.PERMISSION_DISABLE_FLIGHT;
-		new ComponentButton(20, 20 + (++id * 20) + (id * buffer), compRect, "Disable Flight", plot.hasPermission(flightPerm) ? CHECKBOX_CHECKED : CHECKBOX_XED, (componentSprite, componentText) -> {
-			boolean hasPerm = plot.hasPermission(flightPerm);
-
-			if (hasPerm) {
-				plot.removePermission(flightPerm);
-				componentSprite.setSprite(CHECKBOX_XED);
-			} else {
-				plot.addPermission(flightPerm);
-				componentSprite.setSprite(CHECKBOX_CHECKED);
-			}
-
-			PacketHandler.NETWORK.sendToServer(new PacketUpdatePlot(plot));
-			Minecraft.getMinecraft().player.playSound(SoundEvents.BLOCK_NOTE_BELL, 1, hasPerm ? 2f : 1f);
-		}).render.getTooltip().func((Function<GuiComponent, java.util.List<String>>) t -> {
-			List<String> txt = new ArrayList<>();
-			txt.add("If enabled, your audience will not be able to fly");
 			return txt;
 		});
 

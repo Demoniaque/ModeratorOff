@@ -86,7 +86,7 @@ public final class Plot implements INBTSerializable<NBTTagCompound>, IPermission
 
 	public void onEnter(EntityPlayer player) {
 		for (ItemStack stack : playerInventory) {
-			ItemHandlerHelper.giveItemToPlayer(player, stack);
+			ItemHandlerHelper.giveItemToPlayer(player, stack.copy());
 		}
 		player.inventoryContainer.detectAndSendChanges();
 	}
@@ -141,6 +141,10 @@ public final class Plot implements INBTSerializable<NBTTagCompound>, IPermission
 
 	public PlotDimensions getDimensions() {
 		return dimensions;
+	}
+
+	public NonNullList<ItemStack> getPlayerInventory() {
+		return playerInventory;
 	}
 
 	@Override

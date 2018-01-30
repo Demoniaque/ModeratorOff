@@ -10,6 +10,7 @@ import me.lordsaad.modeoff.common.network.PacketOpenGuiPlot;
 import me.lordsaad.modeoff.common.network.PacketSyncPlots;
 import net.minecraft.command.*;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemStack;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentString;
@@ -33,7 +34,7 @@ public class CommandPlot extends CommandBase {
 	@NotNull
 	@Override
 	public String getUsage(@NotNull ICommandSender sender) {
-		return "/plot <register <mod name> / tp [plotID/player] / manage [plot name] / rename [new name]>";
+		return "/plot <register <mod name> / tp [plotID/player] / manage [plot name] / rename [new name] / saveinventory>";
 	}
 
 	@Override
@@ -57,7 +58,7 @@ public class CommandPlot extends CommandBase {
 	@Override
 	public List<String> getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos targetPos) {
 		if (args.length == 1) {
-			return getListOfStringsMatchingLastWord(args, "register", "tp", "manage", "rename");
+			return getListOfStringsMatchingLastWord(args, "register", "tp", "manage", "rename", "saveinventory");
 		} else {
 			if (args.length == 2) {
 				if ("tp".equals(args[0])) {
@@ -94,6 +95,32 @@ public class CommandPlot extends CommandBase {
 				//		sender.sendMessage(new TextComponentString(TextFormatting.RED + "Plot does not exist. " + TextFormatting.GRAY + "You do not have a registered plot."));
 				//	}
 				//}
+
+				case "saveinventory": {
+					if (!RankRegistry.INSTANCE.getRank(getCommandSenderAsPlayer(sender)).hasPermission(PermissionRegistry.DefaultPermissions.PERMISSION_PLOT_REGISTER)) {
+						sender.sendMessage(new TextComponentString(TextFormatting.RED + "Insufficient Permissions. " + TextFormatting.RED + "You can't own a plot."));
+						return;
+					}
+
+					EntityPlayer player = getCommandSenderAsPlayer(sender);
+					Plot plot = PlotRegistry.INSTANCE.getPlot(player.getUniqueID());
+					if (plot != null) {
+
+						plot.getPlayerInventory().clear();
+						for (int i = 0; i < 9; i++) {
+							ItemStack stack = player.inventory.getStackInSlot(i);
+							if (stack.isEmpty()) continue;
+							plot.getPlayerInventory().add(stack.copy());
+						}
+						PlotRegistry.INSTANCE.savePlot(plot.getID());
+
+						sender.sendMessage(new TextComponentString(TextFormatting.GREEN + "Inventory successfully saved. " + TextFormatting.GRAY + "Viewers will receive these hotbar items when entering the plot now."));
+
+					} else {
+						sender.sendMessage(new TextComponentString(TextFormatting.RED + "You do not have a registered plot."));
+					}
+					return;
+				}
 
 				case "delete": {
 					if (!RankRegistry.INSTANCE.getRank(getCommandSenderAsPlayer(sender)).hasPermission(PermissionRegistry.DefaultPermissions.PERMISSION_PLOT_REGISTER)) {

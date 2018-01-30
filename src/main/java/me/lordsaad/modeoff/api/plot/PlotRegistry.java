@@ -9,7 +9,12 @@ import com.google.gson.stream.JsonWriter;
 import me.lordsaad.modeoff.ModeratorOff;
 import me.lordsaad.modeoff.api.permissions.Permission;
 import me.lordsaad.modeoff.api.permissions.PermissionRegistry;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.NonNullList;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
+import net.minecraftforge.fml.common.registry.ForgeRegistries;
 
 import javax.annotation.Nullable;
 import java.io.File;
@@ -117,6 +122,20 @@ public class PlotRegistry {
 		}
 		object.add("permissions", perms);
 
+		JsonArray inventory = new JsonArray();
+		for (ItemStack itemStack : plot.getPlayerInventory()) {
+			JsonObject object1 = new JsonObject();
+
+			ResourceLocation location = itemStack.getItem().getRegistryName();
+			if (location == null) continue;
+
+			object1.addProperty("item", location.toString());
+			object1.addProperty("damage", itemStack.getItemDamage());
+			object1.addProperty("count", itemStack.getCount());
+			inventory.add(object1);
+		}
+		object.add("inventory", inventory);
+
 		try (JsonWriter writer = new JsonWriter(Files.newBufferedWriter(directory.toPath().resolve("plot_" + plot.getID() + ".json")))) {
 			Streams.write(object, writer);
 		} catch (IOException e) {
@@ -128,6 +147,8 @@ public class PlotRegistry {
 		ModeratorOff.logger.info("<<========================================================================>>");
 		ModeratorOff.logger.info("> Starting plot loading.");
 
+		plots.clear();
+
 		if (directory == null) {
 			ModeratorOff.logger.info("> Main directory does not exist!");
 			return;
@@ -135,7 +156,7 @@ public class PlotRegistry {
 
 		if (!directory.exists()) directory.mkdirs();
 
-		int count = 0;
+		int counter = 0;
 
 		File[] fileList = directory.listFiles();
 		if (fileList == null) {
@@ -149,12 +170,12 @@ public class PlotRegistry {
 			if (!file.exists()) continue;
 
 			if (!file.canRead()) {
-				ModeratorOff.logger.info("    > Cannot read file `" + file.getName() + "`. Check file permissions.");
+				ModeratorOff.logger.info("    > Cannot read file '" + file.getName() + "'. Check file permissions.");
 				continue;
 			}
 
 			if (!file.canWrite()) {
-				ModeratorOff.logger.info("    > Cannot write file `" + file.getName() + "`. Check file permissions.");
+				ModeratorOff.logger.info("    > Cannot write file '" + file.getName() + "'. Check file permissions.");
 				continue;
 			}
 
@@ -162,7 +183,7 @@ public class PlotRegistry {
 				JsonElement element = new JsonParser().parse(new FileReader(file));
 
 				if (element == null) {
-					ModeratorOff.logger.info("    > Could not parse json of `" + file.getName() + "`. Skipping...");
+					ModeratorOff.logger.info("    > Could not parse json of '" + file.getName() + "'. Skipping...");
 					continue;
 				}
 
@@ -184,35 +205,85 @@ public class PlotRegistry {
 
 						String uuid = ownerElement.getAsJsonPrimitive().getAsString();
 						uuids.add(UUID.fromString(uuid));
+
+						ModeratorOff.logger.info("    > Added owner of uuid " + uuid + " to plot " + id);
 					}
 
 					Plot plot = new Plot(id, modName, uuids);
 
-					if (object.has("tags")) {
-						JsonArray tagsArray = object.getAsJsonArray("tags");
+					ModeratorOff.logger.info("    > Found plot id '" + plot.getID() + "'");
+
+					if (object.has("permissions")) {
+						JsonArray tagsArray = object.getAsJsonArray("permissions");
 						for (JsonElement tagElement : tagsArray) {
 							if (!tagElement.isJsonPrimitive()) {
-
-								Permission permission = PermissionRegistry.INSTANCE.getPermission(tagElement.getAsString());
-
-								if (permission != null) plot.addPermission(permission);
-								else ModeratorOff.logger.info("Invalid permission -> " + tagElement.getAsString());
+								continue;
 							}
+
+							Permission permission = PermissionRegistry.INSTANCE.getPermission(tagElement.getAsString());
+
+							if (permission != null) {
+								plot.addPermission(permission);
+
+								ModeratorOff.logger.info("    > Added permission " + permission.getTagID() + " to plot " + plot.getID());
+							} else ModeratorOff.logger.info("Invalid permission -> " + tagElement.getAsString());
+
 						}
 					}
 
-					plots.add(plot);
-					count++;
+					if (object.has("inventory")) {
+						NonNullList<ItemStack> stacks = NonNullList.create();
+						JsonArray tagsArray = object.getAsJsonArray("inventory");
+						for (JsonElement tagElement : tagsArray) {
+							if (!tagElement.isJsonObject()) {
+								continue;
+							}
 
-					ModeratorOff.logger.info("    > Successfully registered plot id `" + plot.getID() + "`");
+							JsonObject object1 = tagElement.getAsJsonObject();
+
+							if (!object1.has("item")) {
+								ModeratorOff.logger.error("Item not found in " + file.getName());
+								continue;
+							}
+
+
+							Item item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(object1.getAsJsonPrimitive("item").getAsString()));
+							if (item == null) {
+								ModeratorOff.logger.info("Invalid item -> " + object1.getAsJsonPrimitive("item").getAsString() + " in " + file.getName());
+								continue;
+							}
+
+							int damage = 0;
+							if (object1.has("damage") && object1.get("damage").isJsonPrimitive() && object1.getAsJsonPrimitive("damage").isNumber()) {
+								damage = object1.getAsJsonPrimitive("damage").getAsInt();
+							}
+
+							int count = 0;
+							if (object1.has("count") && object1.get("count").isJsonPrimitive() && object1.getAsJsonPrimitive("count").isNumber()) {
+								count = object1.getAsJsonPrimitive("count").getAsInt();
+							}
+
+							ItemStack stack = new ItemStack(item, count, damage);
+
+							ModeratorOff.logger.info("    > Added itemstack " + stack.getItem().getUnlocalizedName() + "x" + stack.getCount() + " to plot " + plot.getID());
+							stacks.add(stack);
+						}
+
+						plot.getPlayerInventory().addAll(stacks);
+					}
+
+					plots.add(plot);
+					counter++;
+
+					ModeratorOff.logger.info("    > Successfully registered plot id '" + plot.getID() + "'");
 				}
 
 			} catch (FileNotFoundException e) {
-				ModeratorOff.logger.info("    > Error reading json of `" + file.getName() + "`. -> " + e.getCause());
+				ModeratorOff.logger.info("    > Error reading json of '" + file.getName() + "'. -> " + e.getCause());
 				e.printStackTrace();
 			}
 		}
-		ModeratorOff.logger.info("> Successfully registered " + count + " plots.");
+		ModeratorOff.logger.info("> Successfully registered " + counter + " plots.");
 		ModeratorOff.logger.info("<<========================================================================>>");
 	}
 

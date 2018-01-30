@@ -45,7 +45,7 @@ public class PacketUpdatePlot extends PacketBase {
 		Plot plot = PlotRegistry.INSTANCE.getPlot(this.plot.getID());
 
 		if (plot == null) return;
-		plot.deserializeNBT(plot.serializeNBT());
+		plot.deserializeNBT(this.plot.serializeNBT());
 
 		PlotRegistry.INSTANCE.savePlot(plot.getID());
 

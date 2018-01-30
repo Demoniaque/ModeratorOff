@@ -116,7 +116,7 @@ public class ItemSpeed extends ItemMod {
 			level = compound.getInteger("level");
 		}
 
-		return TextFormatting.GRAY + "Increase Speed [" + TextFormatting.GREEN + "x" + (level + 1) + TextFormatting.GRAY + "]";
+		return TextFormatting.GRAY + "Increase Speed [" + TextFormatting.GREEN + "firstPlotCenterX" + (level + 1) + TextFormatting.GRAY + "]";
 	}
 
 	@Override

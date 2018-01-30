@@ -11,7 +11,7 @@ public class Utils {
 		// length of current segment
 		int segment_length = 1;
 
-		// current position (x, y) and how much of current segment we passed
+		// current position (firstPlotCenterX, firstPlotCenterY) and how much of current segment we passed
 		int x = origin.getXi();
 		int y = origin.getYi();
 		int segment_passed = 0;
@@ -19,7 +19,7 @@ public class Utils {
 			return new Vec2d(x, y);
 		}
 		for (int n = 0; n < plotID; ++n) {
-			// make a step, add 'direction' vector (dx, dy) to current position (x, y)
+			// make a step, add 'direction' vector (dx, dy) to current position (firstPlotCenterX, firstPlotCenterY)
 			x += dx;
 			y += dy;
 			++segment_passed;

@@ -81,7 +81,7 @@ public final class Plot implements INBTSerializable<NBTTagCompound>, IPermission
 
 		Vec2d pos = getPlotPos();
 
-		player.setPositionAndUpdate(pos.getX(), ConfigValues.y, pos.getY());
+		player.setPositionAndUpdate(pos.getX(), ConfigValues.firstPlotCenterY, pos.getY());
 	}
 
 	public void onEnter(EntityPlayer player) {
@@ -119,7 +119,7 @@ public final class Plot implements INBTSerializable<NBTTagCompound>, IPermission
 
 		center = center.mul(ConfigValues.plotSize + ConfigValues.plotMarginWidth);
 
-		center = center.add(ConfigValues.x, ConfigValues.z).add(0.5, 0.5);
+		center = center.add(ConfigValues.firstPlotCenterX, ConfigValues.firstPlotCenterZ).add(0.5, 0.5);
 		return center;
 	}
 

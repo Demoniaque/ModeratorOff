@@ -1,6 +1,7 @@
 package me.lordsaad.modeoff.common.items;
 
 import com.teamwizardry.librarianlib.features.base.item.ItemMod;
+import me.lordsaad.modeoff.api.ConfigValues;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
@@ -60,8 +61,9 @@ public class ItemTeleport extends ItemMod {
 			if (playerIn.isBeingRidden()) playerIn.getPassengers().forEach(Entity::dismountRidingEntity);
 			if (playerIn.dimension != 0) playerIn.changeDimension(0);
 
-			if (type.equalsIgnoreCase("spawn")) playerIn.setPositionAndUpdate(22.5, 100, 9.5);
-			else playerIn.setPositionAndUpdate(886.5, 100, 60.5);
+			if (type.equalsIgnoreCase("spawn"))
+				playerIn.setPositionAndUpdate(ConfigValues.spawnX, ConfigValues.spawnY, ConfigValues.spawnZ);
+			else playerIn.setPositionAndUpdate(ConfigValues.plotX, ConfigValues.plotY, ConfigValues.plotZ);
 
 			playerIn.getCooldownTracker().setCooldown(this, 20);
 		} else {

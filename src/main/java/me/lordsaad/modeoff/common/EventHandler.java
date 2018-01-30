@@ -1,6 +1,7 @@
 package me.lordsaad.modeoff.common;
 
 import me.lordsaad.modeoff.ModItems;
+import me.lordsaad.modeoff.api.ConfigValues;
 import me.lordsaad.modeoff.api.capability.IModoffCapability;
 import me.lordsaad.modeoff.api.capability.ModoffCapabilityProvider;
 import me.lordsaad.modeoff.api.permissions.PermissionRegistry;
@@ -71,29 +72,6 @@ public class EventHandler {
 					TextFormatting.GRAY + "<<====================================>>"));
 		}
 
-		// Change position and world to spawn
-		{
-			if (!(player instanceof EntityPlayerMP)) return;
-			MinecraftServer server = player.world.getMinecraftServer();
-			WorldServer worldServer = DimensionManager.getWorld(0);
-
-			if (server == null) return;
-
-			double x = 22.5, y = 100, z = 9.5;
-
-			if (player.world.provider.getDimension() != 0) {
-				server.getPlayerList().transferPlayerToDimension((EntityPlayerMP) player, 0, new Teleporter(worldServer));
-				player.setPositionAndUpdate(x, y, z);
-				worldServer.spawnEntity(player);
-				worldServer.updateEntityWithOptionalForce(player, false);
-			} else {
-				player.setPosition(x, y, z);
-				((EntityPlayerMP) player).connection.setPlayerLocation(x, y, z, 0, 0);
-			}
-
-			player.setWorld(server.getWorld(0));
-		}
-
 		// Give items
 		{
 			ItemStack speed = new ItemStack(ModItems.SPEED);
@@ -128,11 +106,36 @@ public class EventHandler {
 				((EntityPlayerMP) event.player).connection.sendPacket(new SPacketPlayerAbilities(capabilities));
 			}
 		}
+
+		// Change position and world to spawn
+		{
+			if (!(player instanceof EntityPlayerMP)) return;
+			if (PlotRegistry.INSTANCE.isUUIDRegistered(player.getUniqueID())) return;
+
+			MinecraftServer server = player.world.getMinecraftServer();
+			WorldServer worldServer = DimensionManager.getWorld(0);
+
+			if (server == null) return;
+
+			double x = ConfigValues.spawnX, y = ConfigValues.spawnY, z = ConfigValues.spawnZ;
+
+			if (player.world.provider.getDimension() != 0) {
+				server.getPlayerList().transferPlayerToDimension((EntityPlayerMP) player, 0, new Teleporter(worldServer));
+				player.setPositionAndUpdate(x, y, z);
+				worldServer.spawnEntity(player);
+				worldServer.updateEntityWithOptionalForce(player, false);
+			} else {
+				player.setPosition(x, y, z);
+				((EntityPlayerMP) player).connection.setPlayerLocation(x, y, z, 0, 0);
+			}
+
+			player.setWorld(server.getWorld(0));
+		}
 	}
 
 	@SubscribeEvent
 	public void respawn(net.minecraftforge.fml.common.gameevent.PlayerEvent.PlayerRespawnEvent event) {
-		event.player.setPositionAndUpdate(22.5, 100, 9.5);
+		event.player.setPositionAndUpdate(ConfigValues.spawnX, ConfigValues.spawnY, ConfigValues.spawnZ);
 
 		// Give items
 		{

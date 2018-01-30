@@ -265,7 +265,7 @@ public class PlotRegistry {
 
 							ItemStack stack = new ItemStack(item, count, damage);
 
-							ModeratorOff.logger.info("    > Added itemstack " + stack.getItem().getUnlocalizedName() + "x" + stack.getCount() + " to plot " + plot.getID());
+							ModeratorOff.logger.info("    > Added itemstack " + stack.getItem().getUnlocalizedName() + "firstPlotCenterX" + stack.getCount() + " to plot " + plot.getID());
 							stacks.add(stack);
 						}
 

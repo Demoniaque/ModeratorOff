@@ -13,10 +13,10 @@ public class PlotDimensions implements INBTSerializable<NBTTagCompound> {
 	PlotDimensions(int plotID) {
 		Vec2d center = Utils.spiralLocFromID(plotID, Vec2d.ZERO)
 				.mul(ConfigValues.plotSize + ConfigValues.plotMarginWidth)
-				.add(ConfigValues.x, ConfigValues.z);
+				.add(ConfigValues.firstPlotCenterX, ConfigValues.firstPlotCenterZ);
 
-		corner1 = new BlockPos(center.getX() - (ConfigValues.plotSize / 2), ConfigValues.y, center.getY() - (ConfigValues.plotSize / 2));
-		corner2 = new BlockPos(center.getX() + (ConfigValues.plotSize / 2), ConfigValues.y, center.getY() + (ConfigValues.plotSize / 2));
+		corner1 = new BlockPos(center.getX() - (ConfigValues.plotSize / 2), ConfigValues.firstPlotCenterY, center.getY() - (ConfigValues.plotSize / 2));
+		corner2 = new BlockPos(center.getX() + (ConfigValues.plotSize / 2), ConfigValues.firstPlotCenterY, center.getY() + (ConfigValues.plotSize / 2));
 	}
 
 	PlotDimensions() {

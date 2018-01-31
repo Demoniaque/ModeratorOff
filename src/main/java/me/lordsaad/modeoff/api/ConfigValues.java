@@ -36,4 +36,7 @@ public final class ConfigValues {
 
 	@ConfigProperty(category = "general", comment = "If disabled, will disable the plot and rank system.")
 	public static boolean enablePlotsAndRanks = false;
+
+	@ConfigProperty(category = "general", comment = "If enabled, contestants, judges, sponsors and admins will be able to joint he server only.")
+	public static boolean enableWhiteList = true;
 }

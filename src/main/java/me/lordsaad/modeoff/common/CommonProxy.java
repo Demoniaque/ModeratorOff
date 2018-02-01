@@ -14,6 +14,7 @@ import me.lordsaad.modeoff.api.plot.PlotRegistry;
 import me.lordsaad.modeoff.api.rank.IRank;
 import me.lordsaad.modeoff.api.rank.RankRegistry;
 import me.lordsaad.modeoff.client.gui.GuiHandler;
+import me.lordsaad.modeoff.server.ServerEventHandler;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
@@ -44,6 +45,7 @@ public class CommonProxy {
 		ModoffCapabilityProvider.init();
 
 		MinecraftForge.EVENT_BUS.register(new EventHandler());
+		MinecraftForge.EVENT_BUS.register(new ServerEventHandler());
 		MinecraftForge.EVENT_BUS.register(RankRegistry.INSTANCE);
 
 		File configFolder = new File(event.getModConfigurationDirectory(), "/plots/");

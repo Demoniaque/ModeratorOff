@@ -1,14 +1,19 @@
 package me.lordsaad.modeoff;
 
+import com.mojang.authlib.GameProfile;
+import me.lordsaad.modeoff.api.ConfigValues;
+import me.lordsaad.modeoff.api.rank.IRank;
+import me.lordsaad.modeoff.api.rank.RankRegistry;
 import me.lordsaad.modeoff.common.CommonProxy;
 import me.lordsaad.modeoff.common.command.CommandPlot;
+import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.SidedProxy;
-import net.minecraftforge.fml.common.event.FMLInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
+import net.minecraftforge.fml.common.event.*;
 import org.apache.logging.log4j.Logger;
+
+import java.util.Map;
+import java.util.UUID;
 
 @Mod(
 		modid = ModeratorOff.MOD_ID,
@@ -20,7 +25,7 @@ public class ModeratorOff {
 
 	public static final String MOD_ID = "modeoff";
 	public static final String MOD_NAME = "ModeratorOff";
-	public static final String VERSION = "1.0";
+	public static final String VERSION = "1.1.0";
 
 	public static final String CLIENT = "me.lordsaad.modeoff.client.ClientProxy";
 	public static final String SERVER = "me.lordsaad.modeoff.server.ServerProxy";
@@ -52,5 +57,20 @@ public class ModeratorOff {
 	@Mod.EventHandler
 	public void serverLoad(FMLServerStartingEvent event) {
 		event.registerServerCommand(new CommandPlot());
+	}
+
+	@Mod.EventHandler
+	public void start(FMLServerStartedEvent event) {
+		if (ConfigValues.enableWhiteList) {
+			FMLCommonHandler.instance().getMinecraftServerInstance().getPlayerList().setWhiteListEnabled(true);
+
+			for (Map.Entry<IRank, UUID> entry : RankRegistry.INSTANCE.rankMap.entries()) {
+				if (entry.getKey() == RankRegistry.DefaultRanks.NORMAL) continue;
+				String name = CommonProxy.playerUUIDMap.inverse().get(entry.getValue());
+				FMLCommonHandler.instance().getMinecraftServerInstance().getPlayerList().addWhitelistedPlayer(new GameProfile(entry.getValue(), name));
+			}
+		} else {
+			FMLCommonHandler.instance().getMinecraftServerInstance().getPlayerList().setWhiteListEnabled(false);
+		}
 	}
 }

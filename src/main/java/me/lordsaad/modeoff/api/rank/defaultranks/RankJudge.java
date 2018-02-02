@@ -14,6 +14,7 @@ public class RankJudge implements IRank {
 	private Set<Permission> permissions = new HashSet<>();
 
 	public RankJudge() {
+		permissions.add(PermissionRegistry.DefaultPermissions.PERMISSION_PLOT_REGISTER);
 		permissions.add(PermissionRegistry.DefaultPermissions.PERMISSION_PLOT_ADMIN);
 	}
 

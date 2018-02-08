@@ -106,7 +106,7 @@ public class CommonProxy {
 
 						for (JsonElement teamElement : team) {
 							if (teamElement.isJsonObject()) {
-								JsonObject object = element.getAsJsonObject();
+								JsonObject object = teamElement.getAsJsonObject();
 
 								String playerName = object.getAsJsonPrimitive("name").getAsString();
 								UUID uuid = UUID.fromString(object.getAsJsonPrimitive("uuid").getAsString());

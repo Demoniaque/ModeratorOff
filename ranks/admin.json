@@ -1,7 +1,22 @@
 [
-  "Eladkay",
-  "Escapee",
-  "Tristaric",
-  "pau101",
-  "Demoniaque1"
+  {
+    "name": "Eladkay",
+    "uuid": "c716cef1-833b-47e5-9d62-a936a9552d0d"
+  },
+  {
+    "name": "Escapee",
+    "uuid": "6e787528-811e-4e35-8a02-63dc75b392c3"
+  },
+  {
+    "name": "Tristaric",
+    "uuid": "d475af59-d73c-42be-90ed-f1a78f10d452"
+  },
+  {
+    "name": "pau101",
+    "uuid": "617ab577-0da7-4d6a-a80d-0b516544369d"
+  },
+  {
+    "name": "Demoniaque1",
+    "uuid": "2ac3ed86-bf32-4f64-a010-92b095eed279"
+  }
 ]

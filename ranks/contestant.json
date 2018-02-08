@@ -1,47 +1,140 @@
 [
-  "LoafOfDoggo",
-  [
-    "Gamerick",
-    "Esina"
-  ],
-  "Mowmaster",
-  "levicc00123",
-  "nwmqpa",
-  [
-    "SkySom",
-    "Snurlkins",
-    "warlordjones"
-  ],
-  "trentv4",
-  "EleC0TroN",
-  "Elucent",
-  "The_Icy_One",
-  [
-    "abused_master",
-    "EPIIC_THUNDERCAT"
-  ],
-  "JamiesWhiteShirt",
-  "workshopcraft",
-  [
-    "Pyrofab",
-    "CobraDarkPoney"
-  ],
-  [
-    "115kino",
-    "xJonL",
-    "KingPhygieBoo"
-  ],
-  "jf908",
-  "Fancysaurus",
-  "TheReturningVoid",
-  "SSBlur",
-  [
-    "machinespray",
-    "Ingoleth",
-    "MrCodeWarrior"
-  ],
-  "lukas20056",
-  "InsomniaKitten",
-  "EwyBoy",
-  "quaternary"
+  {
+    "name": "LoafOfDoggo",
+    "uuid": "34440d69-dfa8-4aba-99b6-f66cdf5963ec"
+  },
+  {
+    "name": "Gamerick",
+    "uuid": "3071b202-6d21-4dbb-936c-5bf753fd3d39"
+  },
+  {
+    "name": "Esina",
+    "uuid": "200de2e9-9cd1-4d4a-8559-37511f551c76"
+  },
+  [],
+  {
+    "name": "Mowmaster",
+    "uuid": "a32d6e2c-7936-43b1-aa20-396c7a298314"
+  },
+  {
+    "name": "levicc00123",
+    "uuid": "5f94d344-27ca-404a-ae7c-5340c3350b5b"
+  },
+  {
+    "name": "nwmqpa",
+    "uuid": "8603f518-c2f1-407d-b019-90aa022e22bf"
+  },
+  {
+    "name": "SkySom",
+    "uuid": "27672103-b8c7-400d-8817-49de433336dd"
+  },
+  {
+    "name": "warlordjones",
+    "uuid": "c2e83bd4-e8df-40d6-a639-58ba8b05401e"
+  },
+  [],
+  {
+    "name": "trentv4",
+    "uuid": "5046ff0c-8e31-4705-9f09-521b29e99878"
+  },
+  {
+    "name": "EleC0TroN",
+    "uuid": "139d634e-5aec-4d08-ba69-f41e84bfc7cb"
+  },
+  {
+    "name": "Elucent",
+    "uuid": "9417e568-6054-4a47-b1b5-93f747cfa4ce"
+  },
+  {
+    "name": "The_Icy_One",
+    "uuid": "a08eaa4a-e3df-416d-9ced-d6d4fcd0e88b"
+  },
+  {
+    "name": "abused_master",
+    "uuid": "0177f90b-1352-4306-b22e-e26005965cc4"
+  },
+  {
+    "name": "EPIIC_THUNDERCAT",
+    "uuid": "18a3e84e-a41e-442c-8586-9cc9121142bf"
+  },
+  [],
+  {
+    "name": "JamiesWhiteShirt",
+    "uuid": "cbd1f8e6-3501-4918-8a1c-4610a2d7d478"
+  },
+  {
+    "name": "workshopcraft",
+    "uuid": "8442322d-46ce-4967-bd4f-1800e364293e"
+  },
+  {
+    "name": "Jurassic_Alien",
+    "uuid": "9c8a434b-2adc-4385-bc58-a8f08db3ebb9"
+  },
+  {
+    "name": "Pyrofab",
+    "uuid": "577a28bd-0fcf-49bb-b406-407f8041872b"
+  },
+  {
+    "name": "CobraDarkPoney",
+    "uuid": "1b44461a-f605-4b29-a7a9-04e649d1981c"
+  },
+  [],
+  {
+    "name": "115kino",
+    "uuid": "6a0e8505-1556-4ee9-bec0-6af32f05888d"
+  },
+  {
+    "name": "xJonL",
+    "uuid": "4bfb28a3-005d-4fc9-9238-a55c6c17b575"
+  },
+  {
+    "name": "KingPhygieBoo",
+    "uuid": "1d680bb6-2a9a-4f25-bf2f-a1af74361d69"
+  },
+  [],
+  {
+    "name": "jf908",
+    "uuid": "7757b133-f41a-4fe0-b139-bdc8ca3b9392"
+  },
+  {
+    "name": "Fancysaurus",
+    "uuid": "485e4c19-3f60-408d-ad9f-1f6b80e18ee6"
+  },
+  {
+    "name": "TheReturningVoid",
+    "uuid": "9ccceb44-aa04-421f-8471-0b119c241df0"
+  },
+  {
+    "name": "SSBlur",
+    "uuid": "1da0a5ee-3819-4f79-a8ad-c74b2e351390"
+  },
+  {
+    "name": "machinespray",
+    "uuid": "b8ad70cc-5178-4369-af46-abfa329ce305"
+  },
+  {
+    "name": "Ingoleth",
+    "uuid": "a089aa53-b7ec-4ced-b9f4-3533d7c2d6c4"
+  },
+  {
+    "name": "MrCodeWarrior",
+    "uuid": "117de7ec-f75a-4d1f-9a8b-20e1f1b642ae"
+  },
+  [],
+  {
+    "name": "lukas20056",
+    "uuid": "e149942f-201f-48db-9f25-b34056b86aa9"
+  },
+  {
+    "name": "InsomniaKitten",
+    "uuid": "6c249311-f939-4e66-9f31-49b753bfb14b"
+  },
+  {
+    "name": "EwyBoy",
+    "uuid": "cb544502-e404-45d1-8924-247934ba35e9"
+  },
+  {
+    "name": "quaternary",
+    "uuid": "873dea16-d058-4343-861c-f62c21da124b"
+  }
 ]

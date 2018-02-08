@@ -1,8 +1,26 @@
 [
-  "Hubry",
-  "xbony2",
-  "TheDragonTeam",
-  "Moritz30",
-  "ImmortalPharaoh7",
-  "Jake_evans"
+  {
+    "name": "Hubry",
+    "uuid": "b0a26f6b-d951-4b65-b824-b164b9bc4b90"
+  },
+  {
+    "name": "xbony2",
+    "uuid": "def72598-9f0c-4aba-b000-6cf8c5f817e0"
+  },
+  {
+    "name": "TheDragonTeam",
+    "uuid": "db0144ef-e852-40ed-9d23-e1ca0d41770b"
+  },
+  {
+    "name": "Moritz30",
+    "uuid": "9f3f1545-4668-4050-9c62-5a9fa535cb27"
+  },
+  {
+    "name": "ImmortalPharaoh7",
+    "uuid": "c8c479b2-7464-4b20-adea-b43ff1c10c53"
+  },
+  {
+    "name": "Jake_evans",
+    "uuid": "4ad8f82b-0572-4c1e-98d1-9db29482d235"
+  }
 ]

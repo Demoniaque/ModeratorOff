@@ -14,7 +14,6 @@ import me.lordsaad.modeoff.api.plot.PlotRegistry;
 import me.lordsaad.modeoff.api.rank.IRank;
 import me.lordsaad.modeoff.api.rank.RankRegistry;
 import me.lordsaad.modeoff.client.gui.GuiHandler;
-import me.lordsaad.modeoff.server.ServerEventHandler;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
@@ -45,7 +44,6 @@ public class CommonProxy {
 		ModoffCapabilityProvider.init();
 
 		MinecraftForge.EVENT_BUS.register(new EventHandler());
-		MinecraftForge.EVENT_BUS.register(new ServerEventHandler());
 		MinecraftForge.EVENT_BUS.register(RankRegistry.INSTANCE);
 
 		File configFolder = new File(event.getModConfigurationDirectory(), "/plots/");
@@ -92,48 +90,33 @@ public class CommonProxy {
 				JsonArray array = jsonElement.getAsJsonArray();
 
 				for (JsonElement element : array) {
-					if (element.isJsonPrimitive()) {
-						String playerName = element.getAsJsonPrimitive().getAsString();
+					if (element.isJsonObject()) {
+						JsonObject object = element.getAsJsonObject();
 
-						ModeratorOff.logger.info("  > Looking up uuid for '" + playerName + "'");
-
-						UUID uuid = lookupPlayerUUID(playerName);
-						if (uuid == null) {
-							ModeratorOff.logger.info("    > Failed to find uuid for '" + playerName + "'");
-							continue;
-						} else {
-							ModeratorOff.logger.info("    > Found uuid for '" + playerName + "' -> " + uuid.toString());
-						}
+						String playerName = object.getAsJsonPrimitive("name").getAsString();
+						UUID uuid = UUID.fromString(object.getAsJsonPrimitive("uuid").getAsString());
+						ModeratorOff.logger.info("    > Found player -> " + playerName + " - " + uuid.toString());
 
 						RankRegistry.INSTANCE.rankMap.put(rank, uuid);
-						CommonProxy.playerUUIDMap.put(playerName, uuid);
+						playerUUIDMap.put(playerName, uuid);
 					} else if (element.isJsonArray()) {
 
 						JsonArray team = element.getAsJsonArray();
 						Set<UUID> teamSet = new HashSet<>();
 
 						for (JsonElement teamElement : team) {
-							if (teamElement.isJsonPrimitive()) {
-								String playerName = teamElement.getAsJsonPrimitive().getAsString();
+							if (teamElement.isJsonObject()) {
+								JsonObject object = element.getAsJsonObject();
 
-								ModeratorOff.logger.info("  > Looking up uuid for '" + playerName + "'");
-
-								UUID uuid = lookupPlayerUUID(playerName);
-								if (uuid == null) {
-									ModeratorOff.logger.info("    > Failed to find uuid for '" + playerName + "'");
-									continue;
-								} else {
-									ModeratorOff.logger.info("    > Found uuid for '" + playerName + "' -> " + uuid.toString());
-								}
+								String playerName = object.getAsJsonPrimitive("name").getAsString();
+								UUID uuid = UUID.fromString(object.getAsJsonPrimitive("uuid").getAsString());
+								ModeratorOff.logger.info("    > Found player -> " + playerName + " - " + uuid.toString());
 
 								RankRegistry.INSTANCE.rankMap.put(rank, uuid);
-								CommonProxy.playerUUIDMap.put(playerName, uuid);
-
-								teamSet.add(uuid);
+								playerUUIDMap.put(playerName, uuid);
+								CommonProxy.teams.add(teamSet);
 							}
 						}
-
-						CommonProxy.teams.add(teamSet);
 					}
 				}
 			}
@@ -141,35 +124,5 @@ public class CommonProxy {
 			e1.printStackTrace();
 		}
 		ModeratorOff.logger.info("<<========================================================================>>");
-	}
-
-	public static UUID lookupPlayerUUID(String playerName) {
-		try {
-			String mojangJson = Resources.asCharSource(new URL("https://api.mojang.com/users/profiles/minecraft/" + playerName), Charsets.UTF_8).read();
-
-			JsonElement element = new JsonParser().parse(mojangJson);
-			if (element == null || !element.isJsonObject()) {
-				return null;
-			}
-
-			JsonObject object = element.getAsJsonObject();
-
-			if (object.has("id") && object.get("id").isJsonPrimitive()) {
-				String uuid = object.getAsJsonPrimitive("id").getAsJsonPrimitive().getAsString();
-
-				// Format uuid
-				uuid = uuid.substring(0, 8) + "-"
-						+ uuid.substring(8, 12) + "-"
-						+ uuid.substring(12, 16) + "-"
-						+ uuid.substring(16, 20) + "-"
-						+ uuid.substring(20);
-
-				return UUID.fromString(uuid);
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
-		return null;
 	}
 }

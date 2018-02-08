@@ -1,6 +1,8 @@
 package me.lordsaad.modeoff.common;
 
+import com.teamwizardry.librarianlib.features.network.PacketHandler;
 import me.lordsaad.modeoff.ModItems;
+import me.lordsaad.modeoff.ModeratorOff;
 import me.lordsaad.modeoff.api.ConfigValues;
 import me.lordsaad.modeoff.api.capability.IModoffCapability;
 import me.lordsaad.modeoff.api.capability.ModoffCapabilityProvider;
@@ -9,6 +11,8 @@ import me.lordsaad.modeoff.api.plot.Plot;
 import me.lordsaad.modeoff.api.plot.PlotRegistry;
 import me.lordsaad.modeoff.api.rank.IRank;
 import me.lordsaad.modeoff.api.rank.RankRegistry;
+import me.lordsaad.modeoff.common.network.PacketSyncPlots;
+import me.lordsaad.modeoff.common.network.PacketSyncRanks;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.player.PlayerCapabilities;
@@ -21,13 +25,12 @@ import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.event.ClickEvent;
 import net.minecraft.world.GameType;
 import net.minecraft.world.Teleporter;
-import net.minecraft.world.WorldServer;
-import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.event.ServerChatEvent;
 import net.minecraftforge.event.entity.item.ItemTossEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.world.BlockEvent;
+import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.eventhandler.Event;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
@@ -42,7 +45,12 @@ public class EventHandler {
 	public void joinWorld(net.minecraftforge.fml.common.gameevent.PlayerEvent.PlayerLoggedInEvent event) {
 		EntityPlayer player = event.player;
 
-		PlotRegistry.INSTANCE.loadPlots();
+		if (ConfigValues.enablePlotsAndRanks && event.player instanceof EntityPlayerMP) {
+			ModeratorOff.logger.info("About to sync data to " + event.player.getName());
+			PacketHandler.NETWORK.sendTo(new PacketSyncPlots(PlotRegistry.INSTANCE.plots), (EntityPlayerMP) event.player);
+			PacketHandler.NETWORK.sendTo(new PacketSyncRanks(RankRegistry.INSTANCE.rankMap), (EntityPlayerMP) event.player);
+			ModeratorOff.logger.info("Done.");
+		}
 
 		// Send log in message
 		{
@@ -112,30 +120,37 @@ public class EventHandler {
 			if (!(player instanceof EntityPlayerMP)) return;
 			if (PlotRegistry.INSTANCE.isUUIDRegistered(player.getUniqueID())) return;
 
-			MinecraftServer server = player.world.getMinecraftServer();
-			WorldServer worldServer = DimensionManager.getWorld(0);
+			MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
 
 			if (server == null) return;
 
 			double x = ConfigValues.spawnX, y = ConfigValues.spawnY, z = ConfigValues.spawnZ;
 
 			if (player.world.provider.getDimension() != 0) {
-				server.getPlayerList().transferPlayerToDimension((EntityPlayerMP) player, 0, new Teleporter(worldServer));
-				player.setPositionAndUpdate(x, y, z);
-				worldServer.spawnEntity(player);
-				worldServer.updateEntityWithOptionalForce(player, false);
-			} else {
-				player.setPosition(x, y, z);
-				((EntityPlayerMP) player).connection.setPlayerLocation(x, y, z, 0, 0);
+				server.getPlayerList().transferPlayerToDimension((EntityPlayerMP) player, 0, new Teleporter(server.getWorld(0)));
 			}
+			player.setPosition(x, y, z);
+			((EntityPlayerMP) player).connection.setPlayerLocation(x, y, z, 0, 0);
 
-			player.setWorld(server.getWorld(0));
 		}
 	}
 
 	@SubscribeEvent
 	public void respawn(net.minecraftforge.fml.common.gameevent.PlayerEvent.PlayerRespawnEvent event) {
-		event.player.setPositionAndUpdate(ConfigValues.spawnX, ConfigValues.spawnY, ConfigValues.spawnZ);
+		EntityPlayer player = event.player;
+		if (player instanceof EntityPlayerMP) {
+			MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
+
+			if (server == null) return;
+
+			double x = ConfigValues.spawnX, y = ConfigValues.spawnY, z = ConfigValues.spawnZ;
+
+			if (player.world.provider.getDimension() != 0) {
+				server.getPlayerList().transferPlayerToDimension((EntityPlayerMP) player, 0, new Teleporter(server.getWorld(0)));
+			}
+			player.setPosition(x, y, z);
+			((EntityPlayerMP) player).connection.setPlayerLocation(x, y, z, 0, 0);
+		}
 
 		// Give items
 		{
@@ -181,6 +196,8 @@ public class EventHandler {
 
 	@SubscribeEvent
 	public void leftClickBlock(PlayerInteractEvent.LeftClickBlock event) {
+		if (event.getWorld().provider.getDimension() != 0) return;
+
 		Plot plot = PlotRegistry.INSTANCE.findPlot(event.getPos());
 
 		boolean isAdmin = RankRegistry.INSTANCE.hasPermission(event.getEntityPlayer(), PermissionRegistry.DefaultPermissions.PERMISSION_PLOT_ADMIN);
@@ -204,6 +221,8 @@ public class EventHandler {
 
 	@SubscribeEvent
 	public void onBreakBlock(BlockEvent.BreakEvent event) {
+		if (event.getWorld().provider.getDimension() != 0) return;
+
 		Plot plot = PlotRegistry.INSTANCE.findPlot(event.getPos());
 
 		boolean isAdmin = RankRegistry.INSTANCE.hasPermission(event.getPlayer(), PermissionRegistry.DefaultPermissions.PERMISSION_PLOT_ADMIN);
@@ -223,6 +242,8 @@ public class EventHandler {
 
 	@SubscribeEvent
 	public void breakSpeed(PlayerEvent.BreakSpeed event) {
+		if (event.getEntityPlayer().world.provider.getDimension() != 0) return;
+
 		Plot plot = PlotRegistry.INSTANCE.findPlot(event.getPos());
 
 		boolean isAdmin = RankRegistry.INSTANCE.hasPermission(event.getEntityPlayer(), PermissionRegistry.DefaultPermissions.PERMISSION_PLOT_ADMIN);
@@ -242,6 +263,8 @@ public class EventHandler {
 
 	@SubscribeEvent
 	public void place(BlockEvent.PlaceEvent event) {
+		if (event.getWorld().provider.getDimension() != 0) return;
+
 		Plot plot = PlotRegistry.INSTANCE.findPlot(event.getPos());
 
 		boolean isAdmin = RankRegistry.INSTANCE.hasPermission(event.getPlayer(), PermissionRegistry.DefaultPermissions.PERMISSION_PLOT_ADMIN);
@@ -261,6 +284,8 @@ public class EventHandler {
 
 	@SubscribeEvent
 	public void onTick(TickEvent.PlayerTickEvent event) {
+		if (event.player.world.provider.getDimension() != 0) return;
+
 		if (event.phase == TickEvent.Phase.END && event.side == Side.SERVER && event.player.ticksExisted % 4 == 0) {
 
 			//event.player.addPotionEffect(new PotionEffect(MobEffects.JUMP_BOOST, 999, 1, true, false));

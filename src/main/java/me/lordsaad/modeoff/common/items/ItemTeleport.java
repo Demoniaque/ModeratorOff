@@ -36,7 +36,7 @@ public class ItemTeleport extends ItemMod {
 		else compound = stack.getTagCompound();
 
 		String type;
-		if (!compound.hasKey("type")) compound.setString("type", "spawn");
+		if (!compound.hasKey("type")) compound.setString("type", "plots");
 
 		type = compound.getString("type");
 
@@ -83,7 +83,7 @@ public class ItemTeleport extends ItemMod {
 
 		String type;
 		if (!compound.hasKey("type")) {
-			type = "spawn";
+			type = "plots";
 		} else {
 			type = compound.getString("type");
 		}

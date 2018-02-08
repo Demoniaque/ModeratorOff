@@ -15,7 +15,7 @@ import javax.annotation.Nullable;
  */
 public class DefaultModoffCapability implements IModoffCapability {
 
-	private int rankID = 1;
+	private int rankID = 2;
 
 	@Nullable
 	private Plot enclosingPlot;
